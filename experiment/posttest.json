@@ -2,37 +2,258 @@
   "version": 2.0,
   "questions": [
     {
-      "question": "This is a Sample Question 1?",
+      "question": "During the SBA simulation, when an NF successfully registers with the Discovery Service, what HTTP status code is returned?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "200 OK",
+        "b": "201 Created",
+        "c": "404 Not Found",
+        "d": "500 Internal Server Error"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "Incorrect. 200 indicates a successful request but not a new resource creation.",
+        "b": "Correct. 201 Created means the NF instance was successfully registered with the Discovery Service.",
+        "c": "Incorrect. 404 indicates the Discovery endpoint was not found.",
+        "d": "Incorrect. 500 means a server-side error occurred."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "According to the procedure, what is the very first step required to start the experiment?",
+      "answers": {
+        "a": "Enter the IP address and port.",
+        "b": "Click the 'Create New Service' button.",
+        "c": "Check the service logs for previous activity.",
+        "d": "Select the source and destination services."
+      },
+      "explanations": {
+        "a": "Incorrect. This is done later during configuration.",
+        "b": "Correct. The first step is to click 'Create New Service' to begin the setup.",
+        "c": "Incorrect. Log checking is optional and not the first step.",
+        "d": "Incorrect. Service selection occurs after creation."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "If a Network Function fails to register, which common issue might be the cause?",
+      "answers": {
+        "a": "Incorrect service UUID format",
+        "b": "JSON array syntax is too long",
+        "c": "Missing Content-Type header or incorrect JSON structure",
+        "d": "The HTTP version is too new"
+      },
+      "explanations": {
+        "a": "Incorrect. UUID format rarely causes registration failure.",
+        "b": "Incorrect. JSON syntax length is not typically the issue.",
+        "c": "Correct. Missing Content-Type or malformed JSON leads to registration errors.",
+        "d": "Incorrect. HTTP version is not usually the problem."
+      },
+      "correctAnswer": "c",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "After configuring all required fields for a new service, what action finalizes the deployment?",
+      "answers": {
+        "a": "Click 'Start Service'",
+        "b": "Click 'Validate'",
+        "c": "Wait 5 seconds",
+        "d": "Scroll down and click 'Open Service Terminal'"
+      },
+      "explanations": {
+        "a": "Correct. 'Start Service' initiates the deployment.",
+        "b": "Incorrect. Validation does not deploy the service.",
+        "c": "Incorrect. Waiting alone does nothing.",
+        "d": "Incorrect. This is for troubleshooting, not deployment."
       },
       "correctAnswer": "a",
       "difficulty": "beginner"
     },
     {
-      "question": "This is a Sample Question 2?",
+      "question": "How do you verify the successful deployment of a service after waiting the recommended time?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "Check the 'Service Logs' panel at the bottom of the dashboard.",
+        "b": "Run an 'ipconfig' command in the terminal.",
+        "c": "Click the 'Help' button in the top right corner.",
+        "d": "Observe the 'Status: STABLE' indicator in the Configuration panel"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "Correct. Service Logs confirm runtime activity.",
+        "b": "Incorrect. IP configuration does not verify deployment.",
+        "c": "Incorrect. The Help menu does not show deployment states.",
+        "d": "Incorrect. Status may update later and is not the main confirmation method."
       },
-      "correctAnswer": "c",
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "When creating a second service, what is the most critical configuration detail that must be different from Service1 to avoid a network conflict?",
+      "answers": {
+        "a": "Protocol (e.g., change from HTTP/2 to HTTP/1)",
+        "b": "Service Name",
+        "c": "Description",
+        "d": "IP Address"
+      },
+      "explanations": {
+        "a": "Incorrect. Protocol differences do not cause IP conflicts.",
+        "b": "Incorrect. Names should differ but do not cause conflicts.",
+        "c": "Incorrect. Description text does not affect networking.",
+        "d": "Correct. Services must have unique IP addresses to avoid conflicts."
+      },
+      "correctAnswer": "d",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "In the simulation, the use of HTTP/2 provided which visible improvement over older HTTP versions?",
+      "answers": {
+        "a": "Multiple connections per service",
+        "b": "Parallel message streams over one connection",
+        "c": "Manual connection re-establishment",
+        "d": "Delayed responses for sequencing"
+      },
+      "explanations": {
+        "a": "Incorrect. HTTP/2 reduces the need for multiple connections.",
+        "b": "Correct. HTTP/2 enables multiplexed parallel streams.",
+        "c": "Incorrect. HTTP/2 maintains connections automatically.",
+        "d": "Incorrect. HTTP/2 improves performance, not delays it."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "In the Service Logs, what status is listed next to 'Service1' when it successfully sends a response to Service2?",
+      "answers": {
+        "a": "SUCCESS",
+        "b": "PENDING",
+        "c": "INITIALIZED",
+        "d": "CONNECTED"
+      },
+      "explanations": {
+        "a": "Correct. 'SUCCESS' indicates completed and delivered response.",
+        "b": "Incorrect. PENDING indicates incomplete processing.",
+        "c": "Incorrect. INITIALIZED means the service has started.",
+        "d": "Incorrect. CONNECTED refers to link status, not message success."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "What is the purpose of clicking the 'Open Server Terminal' button in the Troubleshooting step?",
+      "answers": {
+        "a": "To view real-time log streaming from the service.",
+        "b": "To change the service's IP address or Port on the fly.",
+        "c": "To reboot the service without accessing the main dashboard.",
+        "d": "To execute network commands like ping and ipconfig for connectivity verification."
+      },
+      "explanations": {
+        "a": "Incorrect. Logs are viewed elsewhere.",
+        "b": "Incorrect. IP/Port cannot be modified from the terminal.",
+        "c": "Incorrect. Rebooting is not its purpose.",
+        "d": "Correct. The terminal allows running ping/ipconfig for diagnostics."
+      },
+      "correctAnswer": "d",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "The service discovery request returned a list of:",
+      "answers": {
+        "a": "Available user devices",
+        "b": "Registered service instances with IPs and ports",
+        "c": "Cloud containers",
+        "d": "Hardware modules"
+      },
+      "explanations": {
+        "a": "Incorrect. UE discovery is not part of the registry.",
+        "b": "Correct. Discovery lists NF instances and their endpoints.",
+        "c": "Incorrect. Containers are separate from registry functions.",
+        "d": "Incorrect. Physical hardware is not listed."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "A successful ping result is indicated by which key statistic in the final summary?",
+      "answers": {
+        "a": "Lost: 0 (0% loss)",
+        "b": "Packets Sent: 6",
+        "c": "Average round trip time: 10ms",
+        "d": "Minimum time: 20ms"
+      },
+      "explanations": {
+        "a": "Correct. 0% loss confirms successful connectivity.",
+        "b": "Incorrect. Sent packets don't guarantee success.",
+        "c": "Incorrect. RTT varies and does not confirm success alone.",
+        "d": "Incorrect. Min time is not a success indicator."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "The “heartBeatTimer” parameter in the registration response helps to:",
+      "answers": {
+        "a": "Control the JSON format refresh rate",
+        "b": "Schedule regular keep-alive messages from the NF",
+        "c": "Measure end-to-end latency",
+        "d": "Trigger service shutdown"
+      },
+      "explanations": {
+        "a": "Incorrect. It is unrelated to formatting.",
+        "b": "Correct. heartBeatTimer defines keep-alive intervals.",
+        "c": "Incorrect. It is not used for latency measurements.",
+        "d": "Incorrect. It does not shut down services."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "During the simulation, what happened when a new service was added to the network?",
+      "answers": {
+        "a": "All other NFs needed reconfiguration",
+        "b": "The new service became discoverable dynamically through the registry",
+        "c": "The system had to reboot",
+        "d": "A manual IP mapping was required"
+      },
+      "explanations": {
+        "a": "Incorrect. SBA avoids manual reconfiguration.",
+        "b": "Correct. SBA discovery works automatically.",
+        "c": "Incorrect. Reboots are not necessary.",
+        "d": "Incorrect. Mapping is handled automatically."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Which observation during the experiment confirms SBA’s modular design advantage?",
+      "answers": {
+        "a": "Failure of one NF caused all others to stop",
+        "b": "Each NF could register and communicate independently",
+        "c": "Static IP tables had to be edited for every change",
+        "d": "The system refused connections from unknown NFs"
+      },
+      "explanations": {
+        "a": "Incorrect. SBA is fault-tolerant.",
+        "b": "Correct. Independence proves modularity.",
+        "c": "Incorrect. SBA avoids static configs.",
+        "d": "Incorrect. Unknown NFs can register dynamically."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "When Service1 successfully sends a response to Service2, what HTTP status code is logged?",
+      "answers": {
+        "a": "404",
+        "b": "200",
+        "c": "500",
+        "d": "301"
+      },
+      "explanations": {
+        "a": "Incorrect. 404 indicates missing resources.",
+        "b": "Correct. 200 means a successful response.",
+        "c": "Incorrect. 500 indicates server error.",
+        "d": "Incorrect. 301 indicates redirects."
+      },
+      "correctAnswer": "b",
       "difficulty": "beginner"
     }
   ]
