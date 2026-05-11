@@ -769,41 +769,168 @@ button:disabled {
     font-weight: 600;
 }
 
-/* ====
-========================================
+/* ============================================
    Help Modal Styling
    ============================================ */
 .help-modal-content {
-    max-width: 900px;
-    max-height: 80vh;
-    overflow-y: auto;
+    max-width: 700px;
+    width: 92%;
+    padding: 30px 32px 24px;
+    background: #1a2535;
+    border-radius: 12px;
+    border: 1px solid #253347;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
 }
 
-.help-content {
-    margin: 20px 0;
-}
-
-.help-section {
-    margin-bottom: 25px;
-    padding: 15px;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    border-left: 4px solid var(--accent-blue);
-}
-
-.help-section h3 {
-    margin-bottom: 15px;
-    color: var(--accent-blue);
-    font-size: 16px;
-}
-
-.architecture-diagram {
+.help-modal-content h2 {
+    font-size: 21px;
+    font-weight: 700;
+    color: #ecf0f1;
+    margin-bottom: 20px;
     text-align: center;
-    margin: 15px 0;
-    padding: 15px;
-    background: #1a252f;
-    border-radius: 8px;
+    letter-spacing: 0.3px;
 }
+
+.help-sim-section {
+    background: #111d2b;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    padding: 16px 18px 18px;
+    margin-bottom: 20px;
+}
+
+.help-sim-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #3498db;
+    margin-bottom: 14px;
+    letter-spacing: 0.4px;
+}
+
+.help-sim-steps {
+    list-style: none;
+    counter-reset: sim-step;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.help-sim-steps li {
+    counter-increment: sim-step;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    font-size: 13px;
+    color: #bdc3c7;
+    line-height: 1.5;
+}
+
+.help-sim-steps li::before {
+    content: counter(sim-step);
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    background: #3498db;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.help-sim-steps li code {
+    display: inline-block;
+    background: #0a1628;
+    color: #58a6ff;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: 1px solid #1e3a5f;
+    white-space: nowrap;
+}
+
+.help-sim-steps li b {
+    color: #ecf0f1;
+    font-weight: 600;
+}
+
+.help-sim-footer {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.help-sim-footer p {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+.help-sim-procedures-btn {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 9px 24px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.help-sim-procedures-btn:hover {
+    background: #2980b9;
+    color: white;
+}
+
+.help-sim-close-btn {
+    display: block;
+    width: 100%;
+    background: #3498db;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 11px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-top: 0;
+}
+
+.help-sim-close-btn:hover {
+    background: #2980b9;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Keep connection-type classes (used elsewhere) */
+.connection-type {
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 8px;
+}
+.connection-type.nf-bus { background: rgba(46,204,113,0.2); color: #2ecc71; }
+.connection-type.bus-nf { background: rgba(52,152,219,0.2); color: #3498db; }
+.connection-type.bus-bus { background: rgba(255,152,0,0.2); color: #ff9800; }
+.connection-type.nf-nf { background: rgba(155,89,182,0.2); color: #9b59b6; }
+
+
+
+
+
+
+
+
+
 
 .help-steps {
     list-style: none;
@@ -1415,7 +1542,7 @@ button:disabled {
 .windows-terminal-content {
     flex: 1;
     background: #000000;
-    color: #00ff00;
+    color: #f1f3f1;
     padding: 10px;
     overflow-y: auto;
     font-size: 14px;
@@ -1452,7 +1579,7 @@ button:disabled {
 }
 
 .terminal-success {
-    color: #00ff00;
+    color: #f1f1f1;
 }
 
 .terminal-error {
@@ -1467,8 +1594,9 @@ button:disabled {
     display: flex;
     align-items: center;
     background: #000000;
-    border-top: 1px solid #333333;
-    padding-top: 5px;
+    border-top: none;
+    padding-top: 0;
+    min-height: 20px;
 }
 
 .terminal-prompt {
@@ -2242,7 +2370,7 @@ button:disabled {
 .docker-terminal-window {
     width: 900px;
     height: 700px;
-    background: #0d1117;
+    background: #000000;
     border: 2px solid #30363d;
     border-radius: 8px 8px 0 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
@@ -2267,6 +2395,8 @@ button:disabled {
     padding: 0 12px;
     border-radius: 6px 6px 0 0;
     border-bottom: 1px solid #30363d;
+    cursor: default;
+    user-select: none;
 }
 
 .docker-terminal-title {
@@ -2330,8 +2460,8 @@ button:disabled {
 
 .docker-terminal-content {
     flex: 1;
-    background: #0d1117;
-    color: #c9d1d9;
+    background: #000000;
+    color: #ffffff;
     padding: 12px;
     overflow-y: auto;
     font-size: 13px;
@@ -2341,7 +2471,7 @@ button:disabled {
 }
 
 .docker-terminal-header {
-    color: #7d8590;
+    color: #aaaaaa;
     margin-bottom: 12px;
     font-size: 12px;
 }
@@ -2360,16 +2490,16 @@ button:disabled {
 }
 
 .docker-terminal-command {
-    color: #58a6ff;
+    color: #ffffff;
     font-weight: 500;
 }
 
 .docker-terminal-info {
-    color: #c9d1d9;
+    color: #ffffff;
 }
 
 .docker-terminal-success {
-    color: #3fb950;
+    color: #f9fcfa;
 }
 
 .docker-terminal-warning {
@@ -2387,13 +2517,14 @@ button:disabled {
 .docker-terminal-input-line {
     display: flex;
     align-items: center;
-    background: #0d1117;
-    border-top: 1px solid #30363d;
-    padding-top: 8px;
+    background: #000000;
+    border-top: none;
+    padding-top: 0;
+    min-height: 20px;
 }
 
 .docker-terminal-prompt {
-    color: #58a6ff;
+    color: #ffffff;
     margin-right: 8px;
     font-weight: 600;
     white-space: nowrap;
@@ -2403,11 +2534,11 @@ button:disabled {
     flex: 1;
     background: transparent;
     border: none;
-    color: #c9d1d9;
+    color: #ffffff;
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 13px;
     outline: none;
-    caret-color: #58a6ff;
+    caret-color: #ffffff;
 }
 
 .docker-terminal-input::selection {
@@ -2431,7 +2562,7 @@ button:disabled {
 }
 
 .docker-terminal-output::-webkit-scrollbar-track {
-    background: #0d1117;
+    background: #000000;
 }
 
 .docker-terminal-output::-webkit-scrollbar-thumb {
@@ -2441,6 +2572,85 @@ button:disabled {
 
 .docker-terminal-output::-webkit-scrollbar-thumb:hover {
     background: #484f58;
+}
+
+/* Vi overlay styles */
+.vi-overlay {
+    position: absolute;
+    top: 35px; /* below titlebar */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000000;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    z-index: 10;
+}
+
+.vi-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 8px;
+    line-height: 1.5;
+}
+
+.vi-line {
+    white-space: pre;
+    display: flex;
+    gap: 8px;
+}
+
+.vi-line-num {
+    color: #555555;
+    user-select: none;
+    min-width: 28px;
+    text-align: right;
+}
+
+.vi-statusbar {
+    background: #1a1a2e;
+    color: #ffffff;
+    padding: 3px 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    border-top: 1px solid #333;
+}
+
+.vi-filename {
+    color: #58a6ff;
+}
+
+.vi-hint {
+    color: #aaaaaa;
+}
+
+.vi-cmdline {
+    background: #000000;
+    color: #ffffff;
+    padding: 2px 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-top: 1px solid #333;
+}
+
+.vi-colon {
+    color: #ffffff;
+}
+
+.vi-cursor {
+    animation: vi-blink 1s step-end infinite;
+    color: #ffffff;
+}
+
+@keyframes vi-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 /* Responsive Docker terminal */
@@ -2465,4 +2675,159 @@ button:disabled {
     .docker-terminal-input {
         font-size: 12px;
     }
+}
+
+/* ============================================
+   Help Side Panel
+   ============================================ */
+.btn-help-panel {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+}
+
+.btn-help-panel:hover {
+    background: linear-gradient(135deg, #2980b9, #1f6391);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+.help-side-panel {
+    position: fixed;
+    top: 60px;
+    right: -380px;
+    width: 380px;
+    height: calc(100vh - 60px);
+    background: var(--bg-secondary);
+    border-left: 2px solid var(--accent-blue);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.help-side-panel.open {
+    right: 0;
+}
+
+.help-side-header {
+    background: linear-gradient(135deg, var(--bg-tertiary), rgba(52, 152, 219, 0.1));
+    padding: 15px 20px;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.help-side-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.help-side-close:hover {
+    background: var(--accent-red);
+    color: white;
+}
+
+.help-side-steps {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    margin: 0;
+    list-style: none;
+    counter-reset: step-counter;
+}
+
+.help-side-steps li {
+    counter-increment: step-counter;
+    margin-bottom: 18px;
+    padding-left: 40px;
+    position: relative;
+    line-height: 1.6;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.help-side-steps li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: var(--accent-blue);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.help-side-steps code {
+    background: var(--bg-primary);
+    color: #00ff00;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    display: block;
+    margin-top: 4px;
+    word-wrap: break-word;
+}
+
+.help-side-steps b {
+    color: var(--accent-blue);
+}
+
+.help-side-link {
+    display: block;
+    padding: 15px 20px;
+    background: var(--bg-tertiary);
+    border-top: 2px solid var(--border-color);
+    text-align: center;
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.help-side-link:hover {
+    background: var(--accent-blue);
+    color: white;
+}
+
+/* Scrollbar for help panel */
+.help-side-steps::-webkit-scrollbar {
+    width: 8px;
+}
+
+.help-side-steps::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+.help-side-steps::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+.help-side-steps::-webkit-scrollbar-thumb:hover {
+    background: #4a5f7f;
 }

@@ -81,6 +81,22 @@ async function initializeApp() {
         console.log('✅ UI initialized');
 
         // ==========================================
+        // STEP 4.1: Verify Docker Terminal
+        // ==========================================
+        console.log('\n🐳 Step 4.1: Verifying Docker Terminal...');
+        if (!window.dockerTerminal) {
+            console.error('❌ CRITICAL: window.dockerTerminal is not defined!');
+            console.error('This means docker.js failed to initialize properly.');
+            console.warn('⚠️ Docker terminal will not be available.');
+        } else if (typeof window.dockerTerminal.openTerminal !== 'function') {
+            console.error('❌ CRITICAL: window.dockerTerminal.openTerminal is not a function!');
+            console.error('docker.js loaded but the DockerTerminal class is broken.');
+            console.warn('⚠️ Docker terminal will not be available.');
+        } else {
+            console.log('✅ Docker Terminal verified and ready');
+        }
+
+        // ==========================================
         // STEP 4.5: Initialize PDU Session Components
         // ==========================================
         console.log('\n📡 Step 4.5: Initializing PDU session components...');

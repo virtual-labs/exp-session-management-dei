@@ -1,123 +1,282 @@
-## 1. Introduction to Session Management in 5G
+## 1.  5G Session Management
 
-The introduction of the 5G Core (5GC) network has transformed how mobile networks handle user data sessions. Unlike 4G, where connectivity is based on EPS bearers, 5G uses a more flexible, service-based concept called PDU Sessions. These PDU sessions form a logical connection between the User Equipment (UE) and a Data Network (DN) such as the internet, IMS, or enterprise cloud.
+### 1.1 Introduction to Session Management in 5G
 
-Behind every PDU session, the Session Management Function (SMF) acts as the central decision-maker. It controls the complete lifecycle of the user session, including session creation, modification, QoS handling, and release. SMF works closely with the AMF, UPF, PCF, and UDM using HTTP/2 based SBA communication, delivering a cloud-native and highly scalable architecture.
+Session Management is a core functionality of the 5G Core (5GC) network that enables communication between the User Equipment (UE) and external Data Networks (DN) such as the internet, IMS, or enterprise services.
 
-The entire session management framework enables the network to deliver efficient data routing, traffic handling, dynamic QoS, and seamless mobility for every subscriber in the 5G network.
+Unlike 4G LTE, where connectivity is managed through EPS bearers, 5G introduces a more flexible and scalable concept known as the **PDU (Protocol Data Unit) Session**. A PDU session represents a logical connection that allows the UE to send and receive data through the 5G network.
 
-<img src="images/fig-1.svg" alt="Session management in 5G core (5GC)" width="45%">
+At the center of this architecture is the **Session Management Function (SMF)**, which acts as the control entity responsible for managing the entire lifecycle of a session.
 
-*Fig: Session management in 5G core (5GC)*
+### 1.2 Key Responsibilities of Session Management
 
+- Establishing PDU sessions between UE and Data Network  
+- Allocating IP addresses to the UE  
+- Selecting appropriate User Plane Function (UPF)  
+- Applying Quality of Service (QoS) policies  
+- Managing session mobility and continuity  
+- Handling session modification and release  
 
+The 5G session management framework is built on the **Service-Based Architecture (SBA)**, where network functions communicate using **HTTP/2 REST APIs**, making the system highly scalable, modular, and cloud-native.
 
+This design allows:
+
+- Dynamic traffic routing  
+- Low-latency communication  
+- Efficient resource utilization  
+- Seamless mobility support  
+
+<img src="images/fig-1.svg" width="45%">
+
+*Fig: Session management in 5G Core*
 
 ## 2. 5G Core Architecture for Session Management
 
-In the 5G Service-Based Architecture (SBA), Session Management involves the interaction of multiple network functions:
+Session management in 5G involves multiple network functions working together in a coordinated manner.
 
-### Network Functions Involved
-* **AMF (Access and Mobility Management Function)**: Handles registration, mobility, reachability, and NAS signaling. It receives PDU session requests from UE and forwards them to SMF.
-* **SMF (Session Management Function)**: The central controller that manages PDU session establishment, modification, and release. It selects UPF, allocates IP addresses, retrieves policies, and configures QoS.
-* **UPF (User Plane Function)**: Routes user traffic using GTP-U on N3. It performs packet forwarding, QoS enforcement, traffic reporting, and data network interfacing.
-* **PCF (Policy Control Function)**: Provides QoS policies, charging rules, and traffic steering information required during session setup.
-* **UDM (Unified Data Management)**: Supplies subscription data, allowed DNNs, slice profiles, and authentication information.
-* **NRF (Network Repository Function)**: Helps AMF discover suitable SMF instances for selected slices.
+### 2.1 Network Functions and Their Roles
 
-<img src="images/fig-2.svg" alt="5G core architecture for Session management" width="45%">
+#### 2.1.1 AMF (Access and Mobility Management Function)
 
-*Fig: 5G core architecture for Session management*  
+- Acts as the entry point for UE signaling  
+- Receives PDU session requests from UE  
+- Performs UE authentication and mobility tracking  
+- Forwards session requests to SMF  
+
+#### 2.1.2 SMF (Session Management Function)
+
+- Central controller for session management  
+- Establishes, modifies, and releases PDU sessions  
+- Allocates IP addresses to UE  
+- Selects appropriate UPF  
+- Retrieves policy rules from PCF  
+- Configures user-plane tunnels  
+
+#### 2.1.3 UPF (User Plane Function)
+
+- Handles actual data traffic  
+- Routes packets between UE and Data Network  
+- Performs QoS enforcement  
+- Collects usage data for charging  
+
+#### 2.1.4 PCF (Policy Control Function)
+
+- Provides QoS policies  
+- Defines charging rules  
+- Controls traffic steering  
+
+#### 2.1.5 UDM (Unified Data Management)
+
+- Stores subscriber information  
+- Provides allowed DNNs and slice data  
+- Supplies authentication data  
+
+#### 2.1.6 NRF (Network Repository Function)
+
+- Helps in discovering available network functions  
+- Assists AMF in selecting appropriate SMF  
+
+<img src="images/fig-2.svg" width="45%">
+
+*Fig: 5G Core Architecture for Session Management*
 
 ## 3. PDU Session Concepts
 
-A PDU session is a logical connection between the UE and a Data Network that provides connectivity services. Each PDU session is characterized by several parameters:
+A **PDU Session** is a logical connection between the UE and a Data Network.
 
-* **PDU Session Identifier**: A unique identifier assigned by the UE to distinguish between multiple PDU sessions.
-* **S-NSSAI (Single Network Slice Selection Assistance Information)**: Identifies the network slice in which the PDU session is established, enabling network slicing capabilities.
-* **DNN (Data Network Name)**: Specifies the Data Network to which the PDU session provides connectivity, similar to APN in 4G (e.g., "internet", "ims").
-* **PDU Session Type**: Defines the end-user protocol carried by the PDU session - IPv4, IPv6, dual-stack IPv4/IPv6, Ethernet, or Unstructured.
-* **SSC Mode (Session and Service Continuity Mode)**: Determines the longevity of the User Plane anchor point and whether it can be reallocated during mobility.
-* **QoS Flows**: Within each PDU session, multiple QoS flows can be established with different Quality of Service characteristics. For example, one QoS flow for IMS signaling and another for voice call data.
+### 3.1 Key Parameters Explained
 
-<img src="images/fig-3.svg" alt="PDU Session Structure" width="45%">
+- **PDU Session ID**  
+  A unique identifier assigned by the UE for each session.
+
+- **S-NSSAI (Network Slice Identifier)**  
+  Determines the network slice used for the session.
+
+- **DNN (Data Network Name)**  
+  Specifies the target network (e.g., internet, ims).
+
+- **PDU Session Type**  
+  Defines the protocol:
+  - IPv4  
+  - IPv6  
+  - IPv4v6  
+  - Ethernet  
+  - Unstructured  
+
+- **SSC Mode (Session Continuity Mode)**  
+  Defines how the session behaves during mobility:
+  - SSC Mode 1 → Always same UPF  
+  - SSC Mode 2 → UPF can change  
+  - SSC Mode 3 → Session may be released  
+
+- **QoS Flows**  
+  Each session can contain multiple QoS flows with different priorities.
+
+<img src="images/fig-3.svg" width="45%">
 
 *Fig: PDU Session Structure*
 
 ## 4. PDU Session Establishment Process
 
-The UE-requested PDU session establishment is a multi-step procedure involving several network functions working in coordination. The detailed call flow is described below:
+The PDU Session Establishment is a multi-step signaling procedure.
 
-1. **UE Initiates Request**: The UE sends a NAS (Non-Access Stratum) message containing a PDU Session Establishment Request to the AMF. This message includes critical information such as PDU Session ID (generated by UE), S-NSSAI (network slice identifier), DNN (Data Network Name), Request Type (initial/existing/emergency), and N1 SM container with session management parameters.
+### 4.1 Step-by-Step Detailed Flow
 
-2. **AMF Processing**: The AMF receives and validates the request. It determines whether the PDU session can be established based on subscription data, network policies, and available resources. For roaming scenarios, AMF determines if Local Breakout (LBO) or Home Routing should be used.
+Step 1. **UE → AMF**  
+   UE sends **PDU Session Establishment Request** containing:
+   - PDU Session ID  
+   - S-NSSAI  
+   - DNN  
+   - Request type  
 
-3. **SMF Selection**: AMF selects an appropriate SMF instance based on multiple criteria including network slice, requested DNN, UE subscription data, load balancing considerations, and geographic location. The AMF uses NRF for SMF discovery and selection.
+Step 2. **AMF Processing**
 
-4. **Create SM Context Request**: AMF sends a Create SM Context Request to the selected SMF, forwarding all relevant information including SUPI (Subscription Permanent Identifier), PDU Session ID, S-NSSAI, DNN, AMF ID, Request Type, PCF ID, Priority Access, and User Location Information.
+- Validates request  
+- Checks subscription  
+- Selects SMF via NRF  
 
-5. **SMF Registration and Subscription Retrieval**: If the SMF hasn't handled this session before, it registers with UDM for the PDU session. SMF retrieves user subscription data from UDM, including default PDU session policies, QoS parameters, allowed DNN list, and network slice information.
+Step 3. **AMF → SMF**
 
-6. **Policy Retrieval**: SMF contacts PCF to obtain policy and charging control (PCC) rules specific to this PDU session. PCF provides QoS policies, charging rules, traffic steering policies, and session management policies.
+AMF sends **Create SM Context Request** including:
 
-7. **UPF Selection and Session Establishment**: SMF selects an appropriate UPF based on UE location, DNN, network topology, and load distribution. SMF allocates an IP address for the UE from the IP address pool associated with the DNN.
+- SUPI  
+- Session ID  
+- Slice info  
+- Location  
 
-8. **N4 Session Establishment**: SMF sends an N4 Session Establishment Request to the selected UPF, providing Packet Detection Rules (PDR), Forwarding Action Rules (FAR), QoS Enforcement Rules (QER), and Usage Reporting Rules (URR). The UPF acknowledges with N4 Session Establishment Response confirming the session setup.
+Step 4. **SMF → UDM**
 
-9. **Create SM Context Response**: SMF responds to AMF with Create SM Context Response containing PDU Session ID, QoS Flow Identifier (QFI), QoS Profile (5QI, ARP, bit rates), N2 SM information for RAN, CN Tunnel Info (F-TEID), and Session-AMBR (Aggregate Maximum Bit Rate).
+- Retrieves subscription data  
+- Gets allowed DNN and QoS  
 
-10. **RAN Resource Setup**: AMF sends N2 PDU Session Resource Setup Request to the RAN (gNodeB) with the N2 SM information received from SMF. RAN allocates radio resources for the PDU session and establishes the user plane path.
+Step 5. **SMF → PCF**
 
-11. **RAN to UE Signaling**: RAN exchanges RRC (Radio Resource Control) signaling with UE to configure the radio bearers and establish the data radio bearer (DRB) for the PDU session.
+- Requests policy rules  
+- Receives QoS and charging policies  
 
-12. **PDU Session Acceptance**: RAN confirms successful resource setup to AMF through N2 PDU Session Resource Setup Response. AMF forwards PDU Session Establishment Accept message to UE via RAN, including allocated IP address, accepted QoS parameters, Session-AMBR, authorized QoS rules, selected PDU session type, and selected SSC mode.
+Step 6. **SMF Selects UPF**
 
-13. **User Plane Activation**: With all signaling complete, the user plane path is now established end-to-end from UE through RAN, UPF, to the Data Network. The UE can now begin sending and receiving data traffic using the allocated IP address.
+- Based on location and load  
+- Allocates IP address  
 
-<img src="images/fig-4.svg" alt="PDU Session Establishment Call Flow" width="50%">
+Step 7. **SMF → UPF (N4 PFCP)**
 
-*Fig: PDU Session Establishment Call Flow*
+- Sends session rules:
+  - PDR  
+  - FAR  
+  - QER  
+  - URR  
+
+Step 8. **UPF → SMF**
+
+- Confirms session setup  
+
+Step 9. **SMF → AMF**
+
+- Sends session response  
+- Includes QoS and tunnel info  
+
+Step 10. **AMF → gNB**
+
+- Sends N2 setup request  
+
+Step 11. **gNB → UE**
+
+- Establishes RRC and DRB  
+
+Step 12. **UE Receives Accept**
+
+- Gets IP address  
+- Session becomes active  
+
+Step 13. **User Plane Active**
+
+Data flows:
+
+UE → gNB → UPF → Data Network
+
+<img src="images/fig-4.svg" width="50%">
+
+*Fig: PDU Session Establishment Flow*
 
 ## 5. Session Management Messages
 
-* **PDU Session Establishment Request** contains PDU session type (IPv4/IPv6/IPv4v6/Ethernet/Unstructured), SSC mode (1/2/3), 5GSM capability (Reflective QoS support, Multi-homed IPv6 support), Maximum number of supported packet filters, Always-on PDU session indicator, Extended protocol configuration options, and Request Type (initial/existing/emergency).
+### 5.1 PDU Session Establishment Request
 
-* **PDU Session Establishment Accept** includes Selected PDU session type, Selected SSC mode, Authorized QoS rules (QoS Rule ID, precedence, packet filters, QFI), Session-AMBR (downlink and uplink), PDU address (allocated IP address), Authorized QoS flow descriptions (QFI, 5QI, GFBR, MFBR), DNN (Data Network Name), S-NSSAI (network slice), and Extended protocol configuration options (DNS addresses, P-CSCF addresses).
+Contains:
 
-<img src="images/fig-5.svg" alt="5G Session Management Messages – PDU Session Establishment Request & Accept" width="40%">
+- PDU type (IPv4/IPv6)  
+- SSC mode  
+- QoS capability  
+- Request type  
 
-*Fig: 5G Session Management Messages – PDU Session Establishment Request & Accept*
+### 5.2 PDU Session Establishment Accept
 
-## 6. QoS Management
+Contains:
 
-Quality of Service in 5G is managed through QoS Flows within PDU sessions. Each QoS flow is identified by a QFI (QoS Flow Identifier) and characterized by 5QI (5G QoS Identifier), which defines standardized QoS characteristics including resource type (GBR/Non-GBR), priority level, packet delay budget, and packet error rate.
+- Assigned IP address  
+- QoS rules  
+- Session-AMBR  
+- Selected slice  
+- DNS configuration  
 
-**Reflective QoS**: A mechanism where UE derives uplink QoS rules from downlink QoS treatment without explicit signaling, reducing signaling overhead.
+<img src="images/fig-5.svg" width="40%">
+
+*Fig: Session Management Messages*
+
+## 6. QoS Management in 5G
+
+QoS in 5G is handled using **QoS Flows**.
+
+### 6.1 Key Concepts
+
+- **QFI (QoS Flow Identifier)**  
+  Identifies each QoS flow  
+
+- **5QI (5G QoS Identifier)**  
+  Defines QoS characteristics such as:
+  - Latency  
+  - Priority  
+  - Packet loss  
+
+### 6.2 Reflective QoS
+
+- UE derives QoS from downlink  
+- Reduces signaling overhead  
+
+### 6.3 Benefits
+
+- Better traffic prioritization  
+- Supports multiple services  
+- Efficient bandwidth usage  
 
 ## 7. Session Modification and Release
 
-### Session Modification
+### 7.1 Session Modification
 
-Session Modification is triggered when:
-* Application requires higher/lower bandwidth
-* PCF updates policy
-* RAN changes radio capability
-* UE requests new QoS flow
-* Network applies traffic steering
+Triggered when:
+
+- QoS requirements change  
+- New application demand  
+- Policy update  
+- Network optimization  
 
 SMF updates:
-* QoS rules
-* PDRs
-* QERs
-* IP rules
-* Tunnel parameters
 
-and informs AMF/RAN accordingly.
+- QoS rules  
+- Traffic routing  
+- Tunnel parameters  
 
-### Session Release
+### 7.2 Session Release
 
-Session release can be triggered by:
-* UE: PDU Session Release Request
-* Network: Policy or resource optimization
-* Timeout: Inactivity timer expiration
-* RAN: Radio link failure 
+Triggered by:
+
+- UE request  
+- Network policy  
+- Inactivity timeout  
+- Radio failure  
+
+After release:
+
+- Resources are freed  
+- Session context is removed  

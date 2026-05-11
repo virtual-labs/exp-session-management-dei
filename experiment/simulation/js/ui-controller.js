@@ -44,6 +44,7 @@ class UIController {
         this.setupConfigPanelToggle();
         this.setupDeployCoreButton();
         this.setupDockerTerminalButton();
+        this.setupHelpPanel();
     
         
         // Initialize PDU Session Mode
@@ -60,20 +61,69 @@ class UIController {
 
     /**
      * Setup Docker main terminal button (header)
-     * Opens the DockerTerminal from `docker.js` for controlling NFs.
+     * Opens the DockerTerminal from `js/docker.js` for controlling NFs.
      */
     setupDockerTerminalButton() {
         const btn = document.getElementById('btn-docker-terminal');
         if (!btn) return;
 
         btn.addEventListener('click', () => {
-            if (!window.dockerTerminal || typeof window.dockerTerminal.openTerminal !== 'function') {
-                console.error('❌ DockerTerminal not available. Is js/docker.js loaded?');
-                alert('Docker terminal is not available. Please refresh the page.');
+            // Check if docker terminal is available
+            if (!window.dockerTerminal) {
+                console.error('❌ window.dockerTerminal is not defined');
+                console.error('Available window properties:', Object.keys(window).filter(k => k.includes('docker') || k.includes('terminal')));
+                alert('Docker terminal is not available.\n\nPlease try refreshing the page.\n\nIf the issue persists, check the browser console for errors.');
                 return;
             }
-            window.dockerTerminal.openTerminal();
+
+            // Check if openTerminal method exists
+            if (typeof window.dockerTerminal.openTerminal !== 'function') {
+                console.error('❌ window.dockerTerminal.openTerminal is not a function');
+                console.error('window.dockerTerminal type:', typeof window.dockerTerminal);
+                console.error('window.dockerTerminal keys:', Object.keys(window.dockerTerminal));
+                alert('Docker terminal is not properly initialized.\n\nPlease refresh the page and try again.');
+                return;
+            }
+
+            // Open the terminal
+            try {
+                window.dockerTerminal.openTerminal();
+                console.log('✅ Docker terminal opened successfully');
+            } catch (error) {
+                console.error('❌ Error opening Docker terminal:', error);
+                alert('Failed to open Docker terminal: ' + error.message);
+            }
         });
+
+        console.log('✅ Docker terminal button setup complete');
+    }
+
+    /**
+     * Setup Help side panel toggle
+     */
+    setupHelpPanel() {
+        const openBtn = document.getElementById('btn-help-panel');
+        const closeBtn = document.getElementById('btn-close-help-panel');
+        const modal = document.getElementById('help-modal');
+        const modalCloseBtn = document.getElementById('help-close');
+
+        if (openBtn && modal) {
+            openBtn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+        }
+
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
     }
 
     // ==========================================
@@ -584,6 +634,8 @@ class UIController {
 
         console.log('✅ Topology cleared');
         alert('Topology cleared successfully!');
+        // Full refresh ensures complete re-initialization of all managers and UI state
+        window.location.reload();
     }
 
     /**
@@ -695,6 +747,27 @@ class UIController {
     showNFConfigurationForNewNF(nfType) {
         const configForm = document.getElementById('config-form');
         if (!configForm) return;
+
+        // Block re-deployment: show warning in config panel if NF already exists (except UE)
+        if (nfType !== 'UE') {
+            const existing = window.dataStore?.getAllNFs().find(n => n.type === nfType);
+            if (existing) {
+                configForm.innerHTML = `
+                    <div style="background:#2d1b1b;border:1px solid #e74c3c;border-radius:6px;padding:16px;text-align:center;">
+                        <div style="font-size:28px;margin-bottom:8px;">🚫</div>
+                        <div style="color:#e74c3c;font-weight:bold;font-size:14px;margin-bottom:8px;">Already Deployed</div>
+                        <div style="color:#ccc;font-size:12px;margin-bottom:12px;">
+                            <strong>${existing.name}</strong> is already running.<br>
+                            Each NF can only be deployed once.
+                        </div>
+                        <div style="color:#95a5a6;font-size:11px;">
+                            Remove the existing ${nfType} first to deploy a new one.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+        }
 
         // Get NF definition for defaults
         const nfDef = window.nfManager?.getNFDefinition(nfType) || { name: nfType, color: '#95a5a6' };
@@ -942,14 +1015,11 @@ class UIController {
                 
                 <button class="btn btn-danger btn-block" id="btn-delete-nf" style="margin-top: 15px;">Delete UE</button>
                 
-                <div class="troubleshoot-section">
-                    <h4>🔧 Troubleshoot</h4>
-                    <p class="config-hint">Open Windows-style terminal for network diagnostics</p>
-                    
-                    <button class="btn btn-terminal btn-block" id="btn-open-terminal">
-                        💻 Open Command Prompt
-                    </button>
-                </div>
+                
+                <button class="btn btn-terminal btn-block" id="btn-open-terminal">
+                    💻 Open Command Prompt
+                </button>
+                
             `;
         } else {
             // Standard configuration for other NF types
@@ -1002,14 +1072,11 @@ class UIController {
             </div>
             ` : ''}
             
-            <div class="troubleshoot-section">
-                <h4>🔧 Troubleshoot</h4>
-                <p class="config-hint">Open Windows-style terminal for network diagnostics</p>
-                
-                <button class="btn btn-terminal btn-block" id="btn-open-terminal">
-                    💻 Open Command Prompt
-                </button>
-            </div>
+            
+            <button class="btn btn-terminal btn-block" id="btn-open-terminal">
+                💻 Open Command Prompt
+            </button>
+            
         `;
         }
 
@@ -1203,6 +1270,15 @@ class UIController {
      * @param {string} nfType - NF type
      */
     startNewNetworkFunction(nfType) {
+        // Block re-deployment: only one instance of each NF type allowed (except UE)
+        if (nfType !== 'UE') {
+            const existing = window.dataStore?.getAllNFs().find(n => n.type === nfType);
+            if (existing) {
+                alert(`❌ Already Deployed!\n\n${nfType} is already running as ${existing.name}.\n\nEach network function can only be deployed once.\nRemove the existing ${nfType} before deploying a new one.`);
+                return;
+            }
+        }
+
         // UE: Handle subscriber information
         if (nfType === 'UE') {
             const imsi = document.getElementById('config-imsi')?.value;
@@ -2560,20 +2636,16 @@ class UIController {
                         Command Prompt - ${nf.name} (${nf.config.ipAddress})
                     </div>
                     <div class="terminal-controls">
-                        <button class="terminal-btn minimize">−</button>
-                        <button class="terminal-btn maximize">□</button>
                         <button class="terminal-btn close" id="terminal-close">×</button>
                     </div>
                 </div>
                 <div class="windows-terminal-content" id="terminal-content">
-                    <div class="terminal-header">
-                        Microsoft Windows [Version 10.0.19045.3570]<br>
-                        (c) Microsoft Corporation. All rights reserved.<br><br>
-                    </div>
-                    <div class="terminal-output" id="terminal-output"></div>
-                    <div class="terminal-input-line">
-                        <span class="terminal-prompt">C:\\${nf.name}></span>
-                        <input type="text" id="terminal-input" class="terminal-input" autocomplete="off" spellcheck="false">
+                    
+                    <div class="terminal-output" id="terminal-output">
+                        <div class="terminal-input-line terminal-active-input">
+                            <span class="terminal-prompt">C:\\${nf.name}></span>
+                            <input type="text" id="terminal-input" class="terminal-input" autocomplete="off" spellcheck="false">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2609,6 +2681,35 @@ class UIController {
         
         let commandHistory = [];
         let historyIndex = -1;
+        let tabState = { lastInput: null, showedList: false };
+
+        const nfCommands = [
+            'help',
+            'ipconfig',
+            'ifconfig',
+            'ip addr',
+            'systeminfo',
+            'netstat',
+            'cls',
+            'clear',
+            'exit',
+            'ping ',
+            'ping subnet',
+            'iperf3 -s',
+            'iperf3 -B ',
+        ];
+
+        const lcpFn = (strings) => {
+            if (!strings.length) return '';
+            let prefix = strings[0];
+            for (let i = 1; i < strings.length; i++) {
+                while (!strings[i].startsWith(prefix)) {
+                    prefix = prefix.slice(0, -1);
+                    if (!prefix) return '';
+                }
+            }
+            return prefix;
+        };
 
         // Close button - cleanup iperf3 server if running
         closeBtn.addEventListener('click', () => {
@@ -2678,7 +2779,51 @@ class UIController {
                 input.value = '';
                 return;
             }
-            
+
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const currentVal = input.value;
+                const matches = nfCommands.filter(c => c.startsWith(currentVal) && c !== currentVal);
+
+                if (matches.length === 0) return;
+
+                if (matches.length === 1) {
+                    input.value = matches[0];
+                    tabState = { lastInput: null, showedList: false };
+                    return;
+                }
+
+                let lcp = matches[0];
+                for (let i = 1; i < matches.length; i++) {
+                    while (!matches[i].startsWith(lcp)) lcp = lcp.slice(0, -1);
+                }
+
+                if (lcp.length > currentVal.length) {
+                    input.value = lcp;
+                    tabState = { lastInput: null, showedList: false };
+                    return;
+                }
+
+                if (tabState.lastInput === currentVal) return;
+
+                this.addTerminalLine(output, `C:\\${nf.name}>${currentVal}`, 'command');
+                const splitPoint = lcp.lastIndexOf(' ') + 1;
+                const options = [...new Set(
+                    matches.map(m => {
+                        const token = m.slice(splitPoint);
+                        const end = token.indexOf(' ');
+                        return end === -1 ? token : token.slice(0, end);
+                    })
+                )].filter(Boolean);
+                this.addTerminalLine(output, options.join('    '), 'info');
+                tabState = { lastInput: currentVal, showedList: true };
+                return;
+            }
+
+            if (e.key !== 'Tab') {
+                tabState = { lastInput: null, showedList: false };
+            }
+
             if (e.key === 'Enter') {
                 const command = input.value.trim();
                 if (command) {
@@ -2686,14 +2831,17 @@ class UIController {
                     commandHistory.push(command);
                     historyIndex = commandHistory.length;
 
-                    // Display command
                     this.addTerminalLine(output, `C:\\${nf.name}>${command}`, 'command');
-                    
-                    // Clear input
+
+                    const promptLine = output.querySelector('.terminal-active-input');
+                    if (promptLine) promptLine.style.display = 'none';
+
                     input.value = '';
 
-                    // Process command
                     await this.processWindowsCommand(nf, command, output);
+
+                    if (promptLine) promptLine.style.display = 'flex';
+                    input.focus();
                 }
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
@@ -2743,12 +2891,14 @@ class UIController {
         } else if (cmd === 'ping subnet') {
             await this.executeWindowsPingSubnet(nf, output);
         } else if (cmd === 'cls' || cmd === 'clear') {
+            const activeInputLine = output.querySelector('.terminal-active-input');
             output.innerHTML = '';
+            if (activeInputLine) {
+                output.appendChild(activeInputLine);
+            }
         } else if (cmd === 'exit') {
             const closeBtn = document.getElementById('terminal-close');
             if (closeBtn) closeBtn.click();
-        } else if (cmd === 'dir') {
-            this.showDirectory(output);
         } else if (cmd === 'systeminfo') {
             this.showSystemInfo(nf, output);
         } else if (cmd === 'netstat') {
@@ -2777,7 +2927,13 @@ class UIController {
         const line = document.createElement('div');
         line.className = `terminal-line terminal-${type}`;
         line.innerHTML = text || '&nbsp;';
-        output.appendChild(line);
+
+        const activeInputLine = output.querySelector('.terminal-active-input');
+        if (activeInputLine) {
+            output.insertBefore(line, activeInputLine);
+        } else {
+            output.appendChild(line);
+        }
         
         // Auto-scroll to bottom
         output.scrollTop = output.scrollHeight;
@@ -2789,25 +2945,35 @@ class UIController {
      */
     showWindowsHelp(output) {
         const helpText = [
-            'Available commands:',
+            'Quick Procedures:',
             '',
-            'HELP        - Display this help message',
-            'IPCONFIG    - Display network configuration (Windows style)',
-            'IFCONFIG    - Display network interfaces (Linux style)',
-            'PING        - Test network connectivity',
-            'IPERF3      - Network throughput testing',
-            '  Server:   iperf3 -s (ext-dn only)',
-            '  Client:   iperf3 -B <UE_IP> -c <EXT_DN_IP> [-R] (UE only)',
-            'SYSTEMINFO  - Display system information',
-            'NETSTAT     - Display network connections',
-            'CLS         - Clear the screen',
-            'EXIT        - Close this terminal',
-            ''
+            '  ping <IP>        - Test connectivity to an IP',
+            '  ping subnet      - Ping all NFs in the subnet',
+            '  ipconfig         - Show network config',
+            '  ifconfig         - Show interfaces (Linux style)',
+            '  netstat          - Show network connections',
+            '  systeminfo       - Show system info',
+            '  iperf3 -s        - Start iperf3 server (ext-dn only)',
+            '  iperf3 -B <UE_IP> -c <EXT_DN_IP> - Run iperf3 client (UE only)',
+            '  cls              - Clear screen',
+            '  exit             - Close terminal',
+            '',
         ];
 
         helpText.forEach(line => {
             this.addTerminalLine(output, line, 'info');
         });
+
+        // Procedures link
+        const linkLine = document.createElement('div');
+        linkLine.className = 'terminal-line terminal-info';
+        linkLine.innerHTML = '  For full details: <a href="../procedure.md" target="_blank" style="color:#58a6ff;text-decoration:underline;">View Procedures</a>';
+        const activeInputLine = output.querySelector('.terminal-active-input');
+        if (activeInputLine) {
+            output.insertBefore(linkLine, activeInputLine);
+        } else {
+            output.appendChild(linkLine);
+        }
     }
 
     /**

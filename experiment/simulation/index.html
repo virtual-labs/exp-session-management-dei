@@ -15,22 +15,19 @@
         <!-- Top Toolbar -->
         <div class="toolbar">
             <div class="toolbar-left">
-                <h1>🌐 Session Management Dashboard</h1>
+                <h1>&#127760; Session Management</h1>
             </div>
             <div class="toolbar-right">
-                <!-- Main action buttons -->
-
-                <button id="btn-docker-terminal" class="btn btn-terminal" title="Open Docker Main Terminal (NF control)">🐳 Terminal</button>
+                                <button id="btn-pdu-session" class="btn btn-pdu">&#x1F4E1; PDU Session</button>
                 <button id="btn-deploy-core" class="btn btn-secondary"
-                    style="background-color: #8e44ad; color: white;">🚀 Deploy Core</button>
-                <button id="btn-add-nf" class="btn btn-primary">➕ Add NF</button>
-                <button id="btn-pdu-session" class="btn btn-pdu">📡 PDU Session</button>
-                <button id="btn-clear" class="btn btn-danger">🗑️ Clears</button>
-                <button id="btn-validate" class="btn btn-info">✓ Validate</button>
-              
+                    style="background-color: #8e44ad; color: white;">&#x1F680; Deploy Core</button>
+                <button id="btn-docker-terminal" class="btn btn-terminal" title="Open Docker Main Terminal (NF control)">&#x1F433; Terminal</button>
+                <button id="btn-add-nf" class="btn btn-primary">&#x2795; Add NF</button>
+                <button id="btn-clear" class="btn btn-danger">&#x1F5D1;&#xFE0F; Clears</button>
+                <button id="btn-validate" class="btn btn-info">&#x2713; Validate</button>
+                <button id="btn-help-panel" class="btn btn-help-panel" title="Simulation Steps">&#x2753; Help</button>
             </div>
         </div>
-
 
         <!-- Main Content Area -->
         <div class="main-content">
@@ -40,14 +37,12 @@
                 <div class="nf-panel-header">
                     <h3>Network Functions</h3>
                     <button id="btn-toggle-nf" class="btn-toggle-nf" title="Hide/Show Network Functions">
-                        <span id="nf-toggle-icon">◀</span>
+                        <span id="nf-toggle-icon">&#9664;</span>
                     </button>
                 </div>
                 <div class="nf-palette">
                     <!-- NF types will be dynamically added here -->
                 </div>
-
-
                 <div class="connection-controls">
                     <h3>Create Connection</h3>
                     <button id="btn-select-source" class="btn btn-block">Select Source</button>
@@ -57,14 +52,13 @@
                 </div>
             </div>
 
-            <!-- PDU Session Mode: Left Messages Panel (hidden by default, appears when PDU mode) -->
+            <!-- PDU Session Mode: Left Messages Panel -->
             <div id="pdu-messages-panel" class="sidebar-left pdu-sidebar hidden">
                 <div class="pdu-panel-header">
-                    <h3>📨 PDU Session Messages</h3>
-                    <button id="btn-close-pdu-messages" class="btn-close-pdu" title="Close PDU Mode">×</button>
+                    <h3>&#x1F4E8; PDU Session Messages</h3>
+                    <button id="btn-close-pdu-messages" class="btn-close-pdu" title="Close PDU Mode">&#x00D7;</button>
                 </div>
                 <div id="pdu-messages-content" class="pdu-messages-content">
-                    <!-- Messages will be dynamically added here -->
                     <p class="pdu-hint">Click step buttons on the right to see message flows</p>
                 </div>
             </div>
@@ -72,94 +66,90 @@
             <!-- Center Canvas Area -->
             <div class="canvas-container">
                 <canvas id="main-canvas"></canvas>
-
-                <!-- Canvas overlay messages -->
                 <div id="canvas-message" class="canvas-message"></div>
             </div>
 
-            <!-- Right Sidebar - Configuration Panel (hidden when PDU mode) -->
+            <!-- Right Sidebar - Configuration Panel -->
             <div id="config-sidebar" class="sidebar-right">
                 <div id="config-panel" class="config-panel">
                     <div class="config-panel-header">
-                        <h3>⚙️ Configuration</h3>
+                        <h3>&#x2699;&#xFE0F; Configuration</h3>
                         <button id="btn-toggle-config" class="btn-toggle-config"
                             title="Hide/Show Configuration Panel (Ctrl+K)">
-                            <span id="config-toggle-icon">◀</span>
+                            <span id="config-toggle-icon">&#9664;</span>
                         </button>
                     </div>
-                    <!-- Configuration form will be dynamically inserted here -->
                     <div id="config-form">
                         <p class="hint">Select a Network Function type to configure and start it</p>
                     </div>
                 </div>
             </div>
 
-            <!-- PDU Session Mode: Right Process Panel (hidden by default, appears when PDU mode) -->
+            <!-- PDU Session Mode: Right Process Panel -->
             <div id="pdu-process-panel" class="sidebar-right pdu-sidebar hidden">
                 <div class="pdu-panel-header">
-                    <h3>📡 PDU Session Establishment</h3>
-                    <button id="btn-close-pdu-process" class="btn-close-pdu" title="Close PDU Mode">×</button>
+                    <h3>&#x1F4E1; PDU Session Establishment</h3>
+                    <button id="btn-close-pdu-process" class="btn-close-pdu" title="Close PDU Mode">&#x00D7;</button>
                 </div>
                 <div id="pdu-steps-container" class="pdu-steps-container">
                     <div class="pdu-step" data-step="1">
                         <button class="btn-pdu-step" id="btn-step-1">
-                            <span class="step-check">○</span>
+                            <span class="step-check">&#x25CB;</span>
                             <span class="step-label">Step 1:</span>
-                            <span class="step-flow">UE → AMF</span>
+                            <span class="step-flow">UE &#x2192; AMF</span>
                         </button>
                         <p class="step-desc">N1 PDU Session Establishment Request</p>
                     </div>
                     <div class="pdu-step" data-step="2">
                         <button class="btn-pdu-step" id="btn-step-2" disabled>
-                            <span class="step-check">○</span>
+                            <span class="step-check">&#x25CB;</span>
                             <span class="step-label">Step 2:</span>
-                            <span class="step-flow">AMF → SMF</span>
+                            <span class="step-flow">AMF &#x2192; SMF</span>
                         </button>
                         <p class="step-desc">Nsmf_PDUSession_Create (HTTP/2 POST)</p>
                     </div>
                     <div class="pdu-step" data-step="3">
                         <button class="btn-pdu-step" id="btn-step-3" disabled>
-                            <span class="step-check">○</span>
+                            <span class="step-check">&#x25CB;</span>
                             <span class="step-label">Step 3:</span>
-                            <span class="step-flow">SMF → UPF</span>
+                            <span class="step-flow">SMF &#x2192; UPF</span>
                         </button>
                         <p class="step-desc">N4 Session Establishment (PFCP)</p>
                     </div>
                     <div class="pdu-step" data-step="4">
                         <button class="btn-pdu-step" id="btn-step-4" disabled>
-                            <span class="step-check">○</span>
+                            <span class="step-check">&#x25CB;</span>
                             <span class="step-label">Step 4:</span>
-                            <span class="step-flow">UPF → SMF</span>
+                            <span class="step-flow">UPF &#x2192; SMF</span>
                         </button>
                         <p class="step-desc">N4 Response (UE IP Allocated)</p>
                     </div>
                     <div class="pdu-step" data-step="5">
                         <button class="btn-pdu-step" id="btn-step-5" disabled>
-                            <span class="step-check">○</span>
+                            <span class="step-check">&#x25CB;</span>
                             <span class="step-label">Step 5:</span>
-                            <span class="step-flow">SMF → AMF</span>
+                            <span class="step-flow">SMF &#x2192; AMF</span>
                         </button>
                         <p class="step-desc">PDU Session Accept</p>
                     </div>
                     <div class="pdu-step" data-step="6">
                         <button class="btn-pdu-step" id="btn-step-6" disabled>
-                            <span class="step-check">○</span>
+                            <span class="step-check">&#x25CB;</span>
                             <span class="step-label">Step 6:</span>
-                            <span class="step-flow">AMF → SMF</span>
+                            <span class="step-flow">AMF &#x2192; SMF</span>
                         </button>
                         <p class="step-desc">Nsmf_PDUSession_Update (Status OK)</p>
                     </div>
                     <div class="pdu-step" data-step="7">
                         <button class="btn-pdu-step" id="btn-step-7" disabled>
-                            <span class="step-check">○</span>
+                            <span class="step-check">&#x25CB;</span>
                             <span class="step-label">Step 7:</span>
-                            <span class="step-flow">AMF → UE</span>
+                            <span class="step-flow">AMF &#x2192; UE</span>
                         </button>
                         <p class="step-desc">N1 PDU Establishment Accept</p>
                     </div>
-
                     <div class="pdu-actions">
-                        <button id="btn-reset-pdu-steps" class="btn btn-secondary btn-block">🔄 Reset Steps</button>
+                        <button id="btn-reset-pdu-steps" class="btn btn-secondary btn-block">&#x1F504; Reset Steps</button>
                     </div>
                 </div>
             </div>
@@ -170,9 +160,9 @@
         <div class="log-panel" id="log-panel">
             <div class="log-panel-header">
                 <div class="log-header-left">
-                    <h3>📋 Network Function Logs</h3>
+                    <h3>&#x1F4CB; Network Function Logs</h3>
                     <button id="btn-toggle-logs" class="btn-toggle-logs" title="Hide/Show Logs (Ctrl+L)">
-                        <span id="toggle-icon">▼</span>
+                        <span id="toggle-icon">&#x25BC;</span>
                     </button>
                 </div>
                 <div class="log-controls">
@@ -211,42 +201,23 @@
     <!-- Help Modal -->
     <div id="help-modal" class="modal" style="display:none;">
         <div class="modal-content help-modal-content">
-            <h2>📚 5G Service-Based Architecture Guide</h2>
-            <div class="help-content">
-                <div class="help-section">
-                    <h3>🏗️ Reference Architecture</h3>
-                    <div class="architecture-diagram">
-                        <img id="sba-diagram" src="images/sba/sba.jpg" alt="5G Service-Based Architecture"
-                            style="width: 100%; max-width: 800px; height: auto; background: #1a252f; border-radius: 8px;">
-                    </div>
-                </div>
-
-                <div class="help-section">
-                    <h3>🚀 Quick Start Guide</h3>
-                    <ol class="help-steps">
-                        <li><strong>Create Service Buses:</strong> Click "📊 Add Bus Line" to create Control Plane and
-                            User Plane buses</li>
-                        <li><strong>Add Network Functions:</strong> Click "➕ Add NF" to add AMF, SMF, UPF, etc.</li>
-                        <li><strong>Connect Components:</strong> Use "Select Source" → "Select Destination" to connect
-                            NFs to buses</li>
-                        <li><strong>Validate Topology:</strong> Click "✓ Validate" to check your 5G network design</li>
-                    </ol>
-                </div>
-
-                <div class="help-section">
-                    <h3>🔗 Connection Types</h3>
-                    <ul class="help-list">
-                        <li><span class="connection-type nf-bus">NF → Bus:</span> Connect Network Functions to Service
-                            Buses</li>
-                        <li><span class="connection-type bus-nf">Bus → NF:</span> Connect Service Buses to Network
-                            Functions</li>
-                        <li><span class="connection-type bus-bus">Bus → Bus:</span> Create bridges between different
-                            service buses</li>
-                        <li><span class="connection-type nf-nf">NF → NF:</span> Direct point-to-point connections</li>
-                    </ul>
-                </div>
+            <h2>&#x1F5A5;&#xFE0F; 5G SBA Simulation &#x2014; Help</h2>
+            <div class="help-sim-section">
+                <div class="help-sim-label">&#x1F680; Simulation Steps</div>
+                <ol class="help-sim-steps">
+                    <li>Open Docker Terminal &#x2192; run <code>docker compose -f docker-compose.yml up -d</code> to deploy the core network (AMF, SMF, UPF, NRF, etc.).</li>
+                    <li>Deploy the gNB &#x2192; <code>docker compose -f docker-compose-gnb.yml up -d</code></li>
+                    <li>Deploy UEs &#x2192; <code>docker compose -f docker-compose-ue.yml up -d</code></li>
+                    <li>Monitor all services &#x2192; <code>watch docker compose -f docker-compose.yml ps -a</code></li>
+                    <li>Click <b>&#x1F4E1; PDU Session</b> button to step through the 5G UE registration procedure.</li>
+                    <li>Click <b>&#x2713; Validate</b> to verify your network topology is correctly configured.</li>
+                    <li>Tear down core network &#x2192; <code>docker compose -f docker-compose.yml down</code></li>
+                </ol>
             </div>
-            <button id="help-close" class="btn btn-primary btn-block">Close</button>
+            <div class="help-sim-footer">
+                <a href="../procedure.html" target="_blank" class="help-sim-procedures-btn">For More Details... &#x1F4CB; View Full Procedures</a>
+            </div>
+            <button id="help-close" class="btn help-sim-close-btn">Close</button>
         </div>
     </div>
 
