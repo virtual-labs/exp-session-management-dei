@@ -178,124 +178,137 @@ class LogEngine {
     onNFAdded(nf) {
         console.log('📋 LogEngine: NF Added:', nf.name);
 
-        // Check if we have custom scenarios for this NF type
         if (this.logScenarios && this.logScenarios[nf.type]) {
             this.runCustomScenario(nf);
+        } else if (!this.logScenarios) {
+            // Scenarios not loaded yet — wait then retry
+            const waitForScenarios = (attempts) => {
+                if (this.logScenarios) {
+                    if (this.logScenarios[nf.type]) {
+                        this.runCustomScenario(nf);
+                    } else {
+                        this.runBasicScenario(nf);
+                    }
+                } else if (attempts > 0) {
+                    setTimeout(() => waitForScenarios(attempts - 1), 300);
+                } else {
+                    this.runBasicScenario(nf);
+                }
+            };
+            setTimeout(() => waitForScenarios(10), 300);
         } else {
-            // Fallback to basic logs
             this.runBasicScenario(nf);
         }
     }
 
     /**
-     * Run custom log scenario from JSON
+     * Run custom log scenario from JSON.
+     *
+     * Phase 1 — startup logs: fire immediately at their exact JSON delays.
+     * Phase 2 — dependency + final_status: fire after NF is stable and
+     *            connections are formed (7 s = 5 s stable + 2 s connections).
      */
     runCustomScenario(nf) {
         const scenario = this.logScenarios[nf.type];
+        if (!scenario) return;
 
-        // ==================================
-        // STARTUP LOGS
-        // ==================================
+        // ── Phase 1: Startup logs ─────────────────────────────────────────────
         if (scenario.startup) {
             Object.values(scenario.startup).forEach(logConfig => {
                 setTimeout(() => {
+                    if (!window.dataStore?.getNFById(nf.id)) return;
                     this.addLog(nf.id, logConfig.level, logConfig.message, logConfig.details || {});
-                }, logConfig.delay);
+                }, logConfig.delay || 0);
             });
         }
 
-        // ==================================
-        // DEPENDENCY CHECKS
-        // ==================================
-        if (scenario.dependencies) {
-            Object.keys(scenario.dependencies).forEach(depType => {
-                const depConfig = scenario.dependencies[depType];
+        // ── Phase 2: Dependency + final-status (after stable + connections) ───
+        const STABLE_WAIT = 7000;
 
-                // Check if dependency exists
-                const exists = this.checkNFTypeExists(depType);
-                const isConnected = this.hasConnectionToType(nf, depType);
+        setTimeout(() => {
+            const freshNF = window.dataStore?.getNFById(nf.id);
+            if (!freshNF) return;
 
-                if (!exists && depConfig.missing) {
-                    // Dependency missing
+            if (scenario.dependencies) {
+                let maxDelay = 0;
+                Object.keys(scenario.dependencies).forEach(depType => {
+                    const depConfig = scenario.dependencies[depType];
+                    const exists      = this.checkNFTypeExists(depType);
+                    const isConnected = this.hasConnectionToType(freshNF, depType);
+
+                    if (!exists && depConfig.missing) {
+                        this.addLog(freshNF.id, depConfig.missing.level,
+                            depConfig.missing.message, depConfig.missing.details || {});
+
+                    } else if (exists && !isConnected && depConfig.exists_not_connected) {
+                        this.addLog(freshNF.id, depConfig.exists_not_connected.level,
+                            depConfig.exists_not_connected.message,
+                            depConfig.exists_not_connected.details || {});
+
+                    } else if (exists && isConnected) {
+                        if (depConfig.connected) {
+                            this.addLog(freshNF.id, depConfig.connected.level,
+                                depConfig.connected.message, depConfig.connected.details || {});
+                            maxDelay = Math.max(maxDelay, depConfig.connected.delay || 0);
+                        }
+                        if (depConfig.registered) {
+                            const stagger = Math.max(300,
+                                (depConfig.registered.delay || 500) - (depConfig.connected?.delay || 0));
+                            setTimeout(() => {
+                                if (!window.dataStore?.getNFById(nf.id)) return;
+                                this.addLog(freshNF.id, depConfig.registered.level,
+                                    depConfig.registered.message, depConfig.registered.details || {});
+                            }, stagger);
+                            maxDelay = Math.max(maxDelay, stagger);
+                        }
+                    }
+                });
+
+                // Final-status fires after all dependency logs
+                if (scenario.final_status) {
                     setTimeout(() => {
-                        this.addLog(nf.id, depConfig.missing.level, depConfig.missing.message, depConfig.missing.details || {});
-                    }, depConfig.missing.delay);
-                } else if (exists && !isConnected && depConfig.exists_not_connected) {
-                    // Exists but not connected
-                    setTimeout(() => {
-                        this.addLog(nf.id, depConfig.exists_not_connected.level, depConfig.exists_not_connected.message, depConfig.exists_not_connected.details || {});
-                    }, depConfig.exists_not_connected.delay);
-                } else if (exists && isConnected) {
-                    // Connected - show connection logs
-                    if (depConfig.connected) {
-                        setTimeout(() => {
-                            // Check if connection is via bus
-                            const connectionMethod = this.getConnectionMethod(nf, depType);
-                            const enhancedDetails = {
-                                ...depConfig.connected.details,
-                                connectionMethod: connectionMethod
-                            };
+                        const nfNow = window.dataStore?.getNFById(nf.id);
+                        if (!nfNow) return;
 
-                            let message = depConfig.connected.message;
-                            if (connectionMethod === 'bus') {
-                                message = message.replace('connection established', 'connection established via Service Bus');
+                        const depInfo = this.dependencies?.[nfNow.type] || { required: [], optional: [] };
+                        let hasErrors   = false;
+                        let hasWarnings = false;
+
+                        depInfo.required.forEach(reqType => {
+                            if (!this.checkNFTypeExists(reqType) ||
+                                !this.hasConnectionToType(nfNow, reqType)) {
+                                hasErrors = true;
                             }
+                        });
+                        depInfo.optional.forEach(optType => {
+                            if (!this.checkNFTypeExists(optType) ||
+                                !this.hasConnectionToType(nfNow, optType)) {
+                                hasWarnings = true;
+                            }
+                        });
 
-                            this.addLog(nf.id, depConfig.connected.level, message, enhancedDetails);
-                        }, depConfig.connected.delay);
-                    }
+                        const finalStatus = !hasErrors && !hasWarnings
+                            ? scenario.final_status.all_ok
+                            : hasErrors
+                                ? scenario.final_status.failed
+                                : scenario.final_status.partial;
 
-                    if (depConfig.registered) {
-                        setTimeout(() => {
-                            this.addLog(nf.id, depConfig.registered.level, depConfig.registered.message, depConfig.registered.details || {});
-                        }, depConfig.registered.delay);
-                    }
+                        if (finalStatus) {
+                            this.addLog(nfNow.id, finalStatus.level,
+                                finalStatus.message, finalStatus.details || {});
+                        }
+                    }, maxDelay + 500);
                 }
-            });
-        }
-
-        // ==================================
-        // FINAL STATUS
-        // ==================================
-        if (scenario.final_status) {
-            const depInfo = this.dependencies[nf.type];
-            let hasErrors = false;
-            let hasWarnings = false;
-
-            // Check all required dependencies
-            depInfo.required.forEach(reqType => {
-                const exists = this.checkNFTypeExists(reqType);
-                const isConnected = this.hasConnectionToType(nf, reqType);
-                if (!exists || !isConnected) {
-                    hasErrors = true;
-                }
-            });
-
-            // Check optional dependencies
-            depInfo.optional.forEach(optType => {
-                const exists = this.checkNFTypeExists(optType);
-                const isConnected = this.hasConnectionToType(nf, optType);
-                if (!exists || !isConnected) {
-                    hasWarnings = true;
-                }
-            });
-
-            // Determine final status
-            let finalStatus;
-            if (!hasErrors && !hasWarnings) {
-                finalStatus = scenario.final_status.all_ok;
-            } else if (hasErrors) {
-                finalStatus = scenario.final_status.failed;
-            } else {
-                finalStatus = scenario.final_status.partial;
-            }
-
-            if (finalStatus) {
+            } else if (scenario.final_status) {
+                // No dependencies — just fire final_status
                 setTimeout(() => {
-                    this.addLog(nf.id, finalStatus.level, finalStatus.message, finalStatus.details || {});
-                }, finalStatus.delay);
+                    const nfNow = window.dataStore?.getNFById(nf.id);
+                    if (!nfNow) return;
+                    const fs = scenario.final_status.all_ok;
+                    if (fs) this.addLog(nfNow.id, fs.level, fs.message, fs.details || {});
+                }, 500);
             }
-        }
+        }, STABLE_WAIT);
     }
 
     /**
@@ -376,48 +389,23 @@ class LogEngine {
 
         console.log('📋 LogEngine: Connection Created');
 
-        // ========================================
-        // SPECIAL CASE: AMF-gNB NGAP Connection
-        // ========================================
+        // ── Special case: gNB ↔ AMF — NGAP setup ────────────────────────────
         if ((sourceNF.type === 'AMF' && targetNF.type === 'gNB') ||
             (sourceNF.type === 'gNB' && targetNF.type === 'AMF')) {
             this.simulateNGAPSetup(sourceNF, targetNF);
-            return; // Skip default logs
+            return;
         }
 
-        // Check if we have custom scenario
-        const hasCustom = this.logScenarios &&
+        // ── If a custom scenario covers this connection, skip generic logs ────
+        // The scenario logs are already scheduled in runCustomScenario Phase 2.
+        // We only need to trigger NGAP/GTP-U for reference-point connections.
+        const hasCustomScenario = this.logScenarios &&
             this.logScenarios[sourceNF.type] &&
             this.logScenarios[sourceNF.type].dependencies &&
             this.logScenarios[sourceNF.type].dependencies[targetNF.type];
 
-        if (hasCustom) {
-            // Use custom connection logs
-            const depConfig = this.logScenarios[sourceNF.type].dependencies[targetNF.type];
-
-            if (depConfig.connected) {
-                setTimeout(() => {
-                    this.addLog(sourceNF.id, depConfig.connected.level,
-                        depConfig.connected.message,
-                        depConfig.connected.details || {});
-                }, depConfig.connected.delay || 500);
-            }
-
-            if (depConfig.registered) {
-                setTimeout(() => {
-                    this.addLog(sourceNF.id, depConfig.registered.level,
-                        depConfig.registered.message,
-                        depConfig.registered.details || {});
-                }, depConfig.registered.delay || 1000);
-            }
-
-            // Also check if target NF needs to log something
-            if (targetNF.type === 'NRF' && sourceNF.type !== 'NRF') {
-                this.simulateNRFRegistration(sourceNF, targetNF);
-            }
-
-        } else {
-            // Use default connection logs
+        if (!hasCustomScenario) {
+            // Generic TLS/HTTP2 logs for connections not covered by scenarios
             this.addLog(connection.sourceId, 'INFO',
                 `Initiating ${connection.interfaceName} connection to ${targetNF.name}`, {
                 protocol: 'HTTP/2',
@@ -432,60 +420,27 @@ class LogEngine {
             });
 
             setTimeout(() => {
-                this.addLog(connection.sourceId, 'INFO', 'TLS handshake in progress...');
-                this.addLog(connection.targetId, 'INFO', 'Accepting TLS connection...');
-            }, 300);
-
-            setTimeout(() => {
-                this.addLog(connection.sourceId, 'SUCCESS', 'TLS handshake complete');
-                this.addLog(connection.targetId, 'SUCCESS', 'TLS session established');
-            }, 700);
-
-            setTimeout(() => {
-                this.addLog(connection.sourceId, 'INFO', 'HTTP/2 connection upgrade...');
-            }, 1000);
-
-            setTimeout(() => {
                 this.addLog(connection.sourceId, 'SUCCESS',
                     `${connection.interfaceName} connection established with ${targetNF.name}`, {
-                    endpoint: `https://${targetNF.config.ipAddress}:${targetNF.config.port}`,
                     protocol: 'HTTP/2',
                     status: 'ACTIVE'
                 });
-
-                this.addLog(connection.targetId, 'SUCCESS',
-                    `${connection.interfaceName} connection active from ${sourceNF.name}`);
-
-                // Re-check dependencies
-                setTimeout(() => {
-                    this.recheckDependenciesAfterConnection(sourceNF);
-                    this.recheckDependenciesAfterConnection(targetNF);
-                }, 500);
-
-                if (targetNF.type === 'NRF') {
-                    this.simulateNRFRegistration(sourceNF, targetNF);
-                }
-
-            }, 1500);
+            }, 800);
         }
 
-        // Trigger NGAP/GTP-U simulation for reference point connections
+        // ── Trigger NGAP/GTP-U for reference-point connections ───────────────
         try {
-            const src = window.dataStore.getNFById(connection.sourceId);
-            const dst = window.dataStore.getNFById(connection.targetId);
-
-            // gNB -> AMF (N2)
-            if (src && dst && ((src.type === 'gNB' && dst.type === 'AMF') || (src.type === 'AMF' && dst.type === 'gNB'))) {
-                const gNB = src.type === 'gNB' ? src : dst;
-                const AMF = src.type === 'AMF' ? src : dst;
-                // ensure not to double-trigger for AMF->gNB direction
+            if ((sourceNF.type === 'gNB' && targetNF.type === 'AMF') ||
+                (sourceNF.type === 'AMF' && targetNF.type === 'gNB')) {
+                const gNB = sourceNF.type === 'gNB' ? sourceNF : targetNF;
+                const AMF = sourceNF.type === 'AMF' ? sourceNF : targetNF;
                 setTimeout(() => this.simulateNGAP(gNB, AMF), 100);
             }
 
-            // gNB -> UPF (N3) — trigger only when both gNB and UPF are involved
-            if (src && dst && ((src.type === 'gNB' && dst.type === 'UPF') || (src.type === 'UPF' && dst.type === 'gNB'))) {
-                const gNB = src.type === 'gNB' ? src : dst;
-                const UPF = src.type === 'UPF' ? src : dst;
+            if ((sourceNF.type === 'gNB' && targetNF.type === 'UPF') ||
+                (sourceNF.type === 'UPF' && targetNF.type === 'gNB')) {
+                const gNB = sourceNF.type === 'gNB' ? sourceNF : targetNF;
+                const UPF = sourceNF.type === 'UPF' ? sourceNF : targetNF;
                 setTimeout(() => this.simulateGTPU(gNB, UPF), 150);
             }
         } catch (e) {

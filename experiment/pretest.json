@@ -1,260 +1,263 @@
 {
   "version": 2.0,
+  "filters": {
+    "difficulty": ["beginner", "intermediate"]
+  },
   "questions": [
     {
-      "question": "What is the full form of SMF in the 5G Core network and what is its primary function?",
+      "question": "Q1. What is the full form of SMF in the 5G Core network and what is its primary function?",
       "answers": {
         "a": "Service Management Framework - manages network services",
         "b": "Session Management Function - manages PDU sessions and UE IP allocation",
         "c": "Security Management Function - handles network security",
         "d": "Subscriber Management Framework - manages subscriber data"
       },
+      "correctAnswer": "b",
+      "difficulty": "beginner",
       "explanations": {
-        "a": "Incorrect. SMF is not responsible for general service management.",
+        "a": "Incorrect.",
         "b": "Correct. SMF manages PDU sessions and allocates UE IP addresses.",
-        "c": "Incorrect. Security is handled by AUSF and SEPP.",
-        "d": "Incorrect. Subscriber data is managed by UDM/UDR."
-      },
-      "correctAnswer": "b",
-      "difficulty": "beginner"
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "What is a PDU Session in 5G?",
+      "question": "Q2. What is a PDU Session in 5G?",
       "answers": {
-        "a": "A physical connection between UE and base station",
-        "b": "A logical connection between UE and a Data Network providing connectivity services",
-        "c": "A security protocol for data encryption",
-        "d": "A radio bearer configuration between UE and gNodeB"
-      },
-      "explanations": {
-        "a": "Incorrect. PDU sessions are logical, not physical.",
-        "b": "Correct. A PDU session provides logical connectivity to a Data Network.",
-        "c": "Incorrect. PDU session is not a security protocol.",
-        "d": "Incorrect. Radio bearers are part of access layer."
+        "a": "A physical connection",
+        "b": "A logical connection between UE and Data Network",
+        "c": "A security protocol",
+        "d": "A radio bearer"
       },
       "correctAnswer": "b",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "Which of the following is NOT a key parameter of a PDU Session?",
+      "question": "Q3. Which of the following is NOT a PDU Session parameter?",
       "answers": {
         "a": "PDU Session ID",
-        "b": "DNN (Data Network Name)",
-        "c": "IMSI (International Mobile Subscriber Identity)",
-        "d": "S-NSSAI (Network Slice identifier)"
-      },
-      "explanations": {
-        "a": "Incorrect. PDU Session ID uniquely identifies the session.",
-        "b": "Incorrect. DNN defines the target data network.",
-        "c": "Correct. IMSI is a subscriber identifier, not a PDU session parameter.",
-        "d": "Incorrect. S-NSSAI defines the network slice for the session."
+        "b": "DNN",
+        "c": "IMSI",
+        "d": "S-NSSAI"
       },
       "correctAnswer": "c",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Correct.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "What is the primary difference between AMF and SMF in the 5G architecture?",
+      "question": "Q4. What is the primary difference between AMF and SMF?",
       "answers": {
-        "a": "AMF handles access and mobility management; SMF handles session management",
-        "b": "AMF handles user plane; SMF handles control plane",
-        "c": "AMF allocates IP addresses; SMF handles authentication",
-        "d": "AMF manages radio resources; SMF manages network slicing"
-      },
-      "explanations": {
-        "a": "Correct. AMF manages access and mobility, while SMF manages sessions.",
-        "b": "Incorrect. Both AMF and SMF are control plane functions.",
-        "c": "Incorrect. SMF allocates IP addresses; authentication is handled by AUSF.",
-        "d": "Incorrect. Radio resources are managed by gNB."
+        "a": "AMF handles mobility, SMF handles sessions",
+        "b": "AMF handles user plane",
+        "c": "SMF handles authentication",
+        "d": "AMF manages radio"
       },
       "correctAnswer": "a",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Correct.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "What is the primary role of the UPF (User Plane Function) in session management?",
+      "question": "Q5. What is the role of UPF?",
       "answers": {
-        "a": "Authenticates users and manages mobility",
-        "b": "Handles packet routing, forwarding, and acts as an anchor point to the Data Network",
-        "c": "Stores subscriber data and policies",
-        "d": "Manages session establishment signaling"
-      },
-      "explanations": {
-        "a": "Incorrect. Authentication and mobility are control plane functions.",
-        "b": "Correct. UPF handles user-plane packet forwarding and anchoring.",
-        "c": "Incorrect. Subscriber data is stored in UDR.",
-        "d": "Incorrect. Session signaling is handled by SMF."
+        "a": "Authentication",
+        "b": "Packet forwarding",
+        "c": "Policy storage",
+        "d": "Session signaling"
       },
       "correctAnswer": "b",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "Which information does the UE send in the PDU Session Establishment Request message?",
+      "question": "Q6. Which parameters are included in PDU Session Request?",
       "answers": {
-        "a": "Only the PDU Session ID",
-        "b": "PDU Session ID, S-NSSAI, DNN, and PDU Session Type",
-        "c": "IMEI and authentication tokens",
-        "d": "QoS parameters and IP address"
-      },
-      "explanations": {
-        "a": "Incorrect. More parameters are required.",
-        "b": "Correct. These parameters define the requested PDU session.",
-        "c": "Incorrect. Authentication information is handled separately.",
-        "d": "Incorrect. IP address is assigned by the SMF."
+        "a": "Only ID",
+        "b": "ID, S-NSSAI, DNN, Type",
+        "c": "IMEI",
+        "d": "IP address"
       },
       "correctAnswer": "b",
-      "difficulty": "beginner"
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "What is the purpose of the Data Network Name (DNN) in 5G session management?",
+      "question": "Q7. What does DNN specify?",
       "answers": {
-        "a": "Identifies the physical location of the data center",
-        "b": "Specifies the Data Network to which the PDU session provides connectivity",
-        "c": "Defines the encryption algorithm for data transmission",
-        "d": "Determines the QoS priority level"
-      },
-      "explanations": {
-        "a": "Incorrect. DNN does not represent physical location.",
-        "b": "Correct. DNN identifies the target Data Network.",
-        "c": "Incorrect. Encryption is handled by security functions.",
-        "d": "Incorrect. QoS is defined by QoS rules and flows."
+        "a": "Location",
+        "b": "Target Data Network",
+        "c": "Encryption",
+        "d": "QoS"
       },
       "correctAnswer": "b",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "Which PDU Session Types are supported in 5G?",
+      "question": "Q8. Which PDU session types exist?",
       "answers": {
-        "a": "IPv4, IPv6, IPv4v6",
-        "b": "TCP, UDP, SCTP",
-        "c": "GTP, MPLS, Ethernet",
-        "d": "LTE, 5G, WiFi"
-      },
-      "explanations": {
-        "a": "Correct. IPv4, IPv6, and IPv4v6 are standard PDU session types.",
-        "b": "Incorrect. These are transport protocols.",
-        "c": "Incorrect. These are networking technologies.",
-        "d": "Incorrect. These are access technologies."
+        "a": "IPv4/IPv6",
+        "b": "TCP/UDP",
+        "c": "GTP/MPLS",
+        "d": "LTE/WiFi"
       },
       "correctAnswer": "a",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Correct.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "What is the significance of the QoS Flow Identifier (QFI) in a PDU session?",
+      "question": "Q9. What does QFI represent?",
       "answers": {
-        "a": "It identifies the physical radio bearer",
-        "b": "It identifies different QoS flows within a PDU session with distinct QoS characteristics",
-        "c": "It specifies the network slice identifier",
-        "d": "It determines the encryption key for the session"
-      },
-      "explanations": {
-        "a": "Incorrect. QFI is not a physical identifier.",
-        "b": "Correct. QFI differentiates QoS flows within a PDU session.",
-        "c": "Incorrect. Network slice is identified by S-NSSAI.",
-        "d": "Incorrect. Encryption keys are managed separately."
+        "a": "Radio bearer",
+        "b": "QoS flow identifier",
+        "c": "Slice ID",
+        "d": "Encryption key"
       },
       "correctAnswer": "b",
-      "difficulty": "beginner"
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "Which network function is responsible for policy control in the 5G Core?",
+      "question": "Q10. Which NF handles policy control?",
       "answers": {
-        "a": "AMF (Access and Mobility Management Function)",
-        "b": "SMF (Session Management Function)",
-        "c": "PCF (Policy Control Function)",
-        "d": "UDM (Unified Data Management)"
-      },
-      "explanations": {
-        "a": "Incorrect. AMF handles access and mobility.",
-        "b": "Incorrect. SMF enforces but does not create policies.",
-        "c": "Correct. PCF provides policy control decisions.",
-        "d": "Incorrect. UDM manages subscriber data."
+        "a": "AMF",
+        "b": "SMF",
+        "c": "PCF",
+        "d": "UDM"
       },
       "correctAnswer": "c",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Correct.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "Which interface is used between SMF and UPF for session control?",
+      "question": "Q11. Which interface connects SMF and UPF?",
       "answers": {
-        "a": "N2 interface",
-        "b": "N3 interface",
-        "c": "N4 interface",
-        "d": "N11 interface"
-      },
-      "explanations": {
-        "a": "Incorrect. N2 connects AMF and gNB.",
-        "b": "Incorrect. N3 carries user-plane traffic.",
-        "c": "Correct. N4 uses PFCP for SMF-UPF control.",
-        "d": "Incorrect. N11 connects AMF and SMF."
+        "a": "N2",
+        "b": "N3",
+        "c": "N4",
+        "d": "N11"
       },
       "correctAnswer": "c",
-      "difficulty": "beginner"
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Correct.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "In 5G, which unit is responsible for UE IP address allocation?",
+      "question": "Q12. Who allocates UE IP?",
       "answers": {
         "a": "AMF",
         "b": "SMF",
         "c": "UPF",
         "d": "UDM"
       },
-      "explanations": {
-        "a": "Incorrect. AMF does not allocate IP addresses.",
-        "b": "Correct. SMF allocates UE IP addresses.",
-        "c": "Incorrect. UPF forwards packets.",
-        "d": "Incorrect. UDM stores subscriber data."
-      },
       "correctAnswer": "b",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "What does S-NSSAI represent in 5G session management?",
+      "question": "Q13. What is S-NSSAI?",
       "answers": {
-        "a": "Session Network Security Authentication Identifier",
-        "b": "Single Network Slice Selection Assistance Information",
-        "c": "Secure Network Session Application Interface",
-        "d": "System Network Signaling and Access Identifier"
-      },
-      "explanations": {
-        "a": "Incorrect. This is not a 3GPP-defined term.",
-        "b": "Correct. S-NSSAI identifies the network slice.",
-        "c": "Incorrect. This term does not exist in 5G.",
-        "d": "Incorrect. This is not a valid definition."
+        "a": "Security ID",
+        "b": "Slice identifier",
+        "c": "Session ID",
+        "d": "Protocol ID"
       },
       "correctAnswer": "b",
-      "difficulty": "beginner"
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
     },
     {
-      "question": "Which interface connects the AMF and SMF?",
+      "question": "Q14. Which interface connects AMF and SMF?",
       "answers": {
-        "a": "N2 interface",
-        "b": "N4 interface",
-        "c": "N7 interface",
-        "d": "N11 interface"
-      },
-      "explanations": {
-        "a": "Incorrect. N2 connects AMF and gNB.",
-        "b": "Incorrect. N4 connects SMF and UPF.",
-        "c": "Incorrect. N7 connects PCF and SMF.",
-        "d": "Correct. N11 connects AMF and SMF."
+        "a": "N2",
+        "b": "N4",
+        "c": "N7",
+        "d": "N11"
       },
       "correctAnswer": "d",
-      "difficulty": "beginner"
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Correct."
+      }
     },
     {
-      "question": "What protocol is used between the RAN and UPF for user-plane data in 5G?",
+      "question": "Q15. Which protocol carries user-plane traffic?",
       "answers": {
-        "a": "N1 - NAS protocol",
-        "b": "N2 - NGAP protocol",
-        "c": "N3 - GTP-U tunnel",
-        "d": "N4 - PFCP protocol"
-      },
-      "explanations": {
-        "a": "Incorrect. NAS is used between UE and AMF.",
-        "b": "Incorrect. NGAP is control plane signaling.",
-        "c": "Correct. GTP-U over N3 carries user-plane traffic.",
-        "d": "Incorrect. PFCP is used for SMF-UPF control."
+        "a": "NAS",
+        "b": "NGAP",
+        "c": "GTP-U",
+        "d": "PFCP"
       },
       "correctAnswer": "c",
-      "difficulty": "beginner"
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Correct.",
+        "d": "Incorrect."
+      }
     }
   ]
 }

@@ -286,27 +286,27 @@ class NFManager {
      * @param {Object} udr - UDR network function
      */
     autoStartMySQLForUDR(udr) {
-        // Check if UDR still exists
-        if (!window.dataStore?.getNFById(udr.id)) {
-            return;
-        }
+        // Always read fresh UDR from dataStore
+        const freshUDR = window.dataStore?.getNFById(udr.id);
+        if (!freshUDR) return;
 
         // Check if MySQL already exists in same subnet
         const allNFs = window.dataStore.getAllNFs();
-        const udrNetwork = this.getNetworkFromIP(udr.config.ipAddress);
-        const existingMySQL = allNFs.find(nf => 
-            nf.type === 'MySQL' && 
+        const udrNetwork = this.getNetworkFromIP(freshUDR.config.ipAddress);
+        const existingMySQL = allNFs.find(nf =>
+            nf.type === 'MySQL' &&
             this.getNetworkFromIP(nf.config.ipAddress) === udrNetwork
         );
 
         if (existingMySQL) {
             console.log(`ℹ️ MySQL already exists in same subnet as UDR: ${existingMySQL.name}`);
-            // Try to connect if not already connected
+            // Try to connect if not already connected — read fresh status
             setTimeout(() => {
-                if (existingMySQL.status === 'stable') {
-                    this.attemptAutoConnections(existingMySQL);
+                const freshMySQL = window.dataStore?.getNFById(existingMySQL.id);
+                if (freshMySQL && freshMySQL.status === 'stable') {
+                    this.attemptAutoConnections(freshMySQL);
                 }
-            }, 6000); // Wait for MySQL to be stable if it's still starting
+            }, 2000);
             return;
         }
 
@@ -859,6 +859,42 @@ class NFManager {
     }
 
     /**
+     * Connect an SBI NF to the service bus.
+     * Finds the existing "Service Bus" (or the first available bus), creates it if
+     * it doesn't exist yet, then connects the NF — idempotent (skips if already connected).
+     * @param {Object} nf - Network Function to connect
+     */
+    _connectNFToBus(nf) {
+        if (!window.busManager || !window.dataStore) return;
+
+        // Find the service bus by name, fall back to first bus, or create one
+        let bus = window.dataStore.getAllBuses().find(b =>
+            b.name === 'Service Bus' || b.name === 'service-bus'
+        );
+        if (!bus) {
+            const allBuses = window.dataStore.getAllBuses();
+            bus = allBuses.length > 0 ? allBuses[0] : null;
+        }
+        if (!bus) {
+            // No bus exists yet — create the default service bus
+            bus = window.busManager.createBusLine('horizontal', { x: 110, y: 152 }, 600, 'Service Bus');
+            if (bus) bus.color = '#3498db';
+        }
+        if (!bus) return;
+
+        // Skip if already connected
+        const alreadyConnected = window.dataStore.getAllBusConnections()
+            .some(bc => bc.nfId === nf.id && bc.busId === bus.id);
+        if (alreadyConnected) return;
+
+        const connection = window.busManager.connectNFToBus(nf.id, bus.id);
+        if (connection) {
+            console.log(`🚌 ${nf.name} connected to ${bus.name}`);
+            if (window.canvasRenderer) window.canvasRenderer.render();
+        }
+    }
+
+    /**
      * Start service lifecycle management
      * @param {Object} nf - Network Function
      */
@@ -890,30 +926,42 @@ class NFManager {
 
                 console.log(`✅ ${nf.name} is now STABLE`);
 
-                // AUTO-CONNECTIONS: Enabled for MySQL, gNB, UE, UPF, ext-dn, and UDM
-                if (nf.type === 'MySQL' || nf.type === 'gNB' || nf.type === 'UE' || nf.type === 'UPF' || nf.type === 'ext-dn' || nf.type === 'UDM') {
-                    // Schedule auto-connections after 8-10 seconds total
+                // AUTO-CONNECT TO BUS: Connect SBI NFs to the service bus.
+                // This works whether the NF was started manually or via terminal.
+                const sbiBusTypes = ['NRF', 'AMF', 'SMF', 'AUSF', 'UDM', 'PCF', 'NSSF', 'UDR'];
+                if (sbiBusTypes.includes(nf.type)) {
+                    this._connectNFToBus(nf);
+                }
+
+                // AUTO-CONNECTIONS: Enabled for all NF types that need bus or direct connections
+                const autoConnectTypes = ['MySQL', 'gNB', 'UE', 'UPF', 'ext-dn', 'UDM',
+                                          'NRF', 'AMF', 'SMF', 'AUSF', 'PCF', 'NSSF', 'UDR'];
+                if (autoConnectTypes.includes(nf.type)) {
                     const autoConnectDelay = 3000 + Math.random() * 2000; // 3-5 more seconds
                     setTimeout(() => {
                         this.attemptAutoConnections(nf);
                     }, autoConnectDelay);
-                    
-                    if (nf.type === 'MySQL') {
-                        console.log(`🔗 Auto-connections enabled for ${nf.name} - will connect to UDR automatically`);
-                    } else if (nf.type === 'gNB') {
-                        console.log(`🔗 Auto-connections enabled for ${nf.name} - will connect to AMF and UPF automatically`);
-                    } else if (nf.type === 'UE') {
-                        console.log(`🔗 Auto-connections enabled for ${nf.name} - will connect to gNB and AMF automatically (no direct UPF connection)`);
-                    } else if (nf.type === 'UPF') {
-                        console.log(`🔗 Auto-connections enabled for ${nf.name} - will connect to SMF automatically (gNB and ext-dn will connect to UPF)`);
+                    console.log(`🔗 Auto-connections scheduled for ${nf.name}`);
+
+                    if (nf.type === 'UPF') {
                         // Auto-start ext-dn when UPF is stable
                         setTimeout(() => {
                             this.autoStartExtDNForUPF(nf);
-                        }, 3000); // Wait 3 seconds before creating ext-dn
-                    } else if (nf.type === 'ext-dn') {
-                        console.log(`🔗 Auto-connections enabled for ${nf.name} - will connect to UPF automatically`);
-                    } else if (nf.type === 'UDM') {
-                        console.log(`🔗 Auto-connections enabled for ${nf.name} - will connect to UDR automatically`);
+                        }, 3000);
+                        
+                        // Also try to connect to existing ext-dn if it already exists
+                        setTimeout(() => {
+                            const allNFs = window.dataStore?.getAllNFs() || [];
+                            const upfNetwork = this.getNetworkFromIP(nf.config.ipAddress);
+                            const existingExtDN = allNFs.find(nf2 =>
+                                nf2.type === 'ext-dn' &&
+                                this.getNetworkFromIP(nf2.config.ipAddress) === upfNetwork
+                            );
+                            if (existingExtDN) {
+                                console.log(`🔗 Attempting connection to existing ext-dn: ${existingExtDN.name}`);
+                                this.ensureExtDNConnection(nf, existingExtDN, 0);
+                            }
+                        }, 5000);
                     }
                 }
                 
@@ -921,11 +969,6 @@ class NFManager {
                 if (nf.type === 'UE') {
                     console.log(`📱 UE registration will begin for ${nf.name}`);
                     this.simulateUERegistration(nf);
-                }
-                
-                // Log for NFs without auto-connections
-                if (!['MySQL', 'gNB', 'UE', 'UPF', 'ext-dn', 'UDM'].includes(nf.type)) {
-                    console.log(`ℹ️ Auto-connections disabled for ${nf.name} - manual connections required`);
                 }
             }
         }, 5000);
@@ -935,8 +978,10 @@ class NFManager {
      * Attempt to auto-create connections between stable services (SAME SUBNET ONLY)
      * @param {Object} nf - Network Function that just became stable
      */
-    attemptAutoConnections(nf) {
-        if (!window.dataStore?.getNFById(nf.id) || nf.status !== 'stable') {
+    attemptAutoConnections(nf, retryCount = 0) {
+        // Always read fresh NF from dataStore to get current status
+        const freshNF = window.dataStore?.getNFById(nf.id);
+        if (!freshNF || freshNF.status !== 'stable') {
             return; // NF was deleted or not stable
         }
 
@@ -998,9 +1043,9 @@ class NFManager {
             return; // MySQL only connects to UDR, exit here
         }
 
-        // SPECIAL CASE: ext-dn only connects to UPF
+        // SPECIAL CASE: ext-dn only connects to UPF (WITH RETRY LOGIC)
         if (nf.type === 'ext-dn') {
-            console.log(`🔗 ext-dn auto-connection: Looking for UPF in same subnet`);
+            console.log(`🔗 ext-dn auto-connection (attempt ${retryCount + 1}): Looking for UPF in same subnet`);
             
             const allNFs = window.dataStore.getAllNFs();
             const sourceNetwork = this.getNetworkFromIP(nf.config.ipAddress);
@@ -1042,16 +1087,25 @@ class NFManager {
                     console.log(`ℹ️ ext-dn already connected to UPF or connection failed`);
                 }
             } else {
-                console.log(`⚠️ No UPF found in same subnet (${sourceNetwork}.0/24) for ext-dn ${nf.name}`);
-                
-                if (window.logEngine) {
-                    window.logEngine.addLog(nf.id, 'WARNING',
-                        `No UPF available in same subnet for external data network connection`, {
-                        sourceSubnet: sourceNetwork + '.0/24',
-                        sourceIP: nf.config.ipAddress,
-                        restriction: 'ext-dn only connects to UPF in same subnet',
-                        suggestion: 'Deploy UPF in the same subnet range'
-                    });
+                // UPF not found or not stable yet - RETRY LOGIC (up to 5 attempts)
+                if (retryCount < 5) {
+                    const retryDelay = 2000 * (retryCount + 1); // 2s, 4s, 6s, 8s, 10s
+                    console.log(`⏳ UPF not ready yet. Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/5)`);
+                    setTimeout(() => {
+                        this.attemptAutoConnections(nf, retryCount + 1);
+                    }, retryDelay);
+                } else {
+                    console.log(`⚠️ No UPF found in same subnet (${sourceNetwork}.0/24) for ext-dn ${nf.name} after 5 retries`);
+                    
+                    if (window.logEngine) {
+                        window.logEngine.addLog(nf.id, 'WARNING',
+                            `No UPF available in same subnet for external data network connection`, {
+                            sourceSubnet: sourceNetwork + '.0/24',
+                            sourceIP: nf.config.ipAddress,
+                            restriction: 'ext-dn only connects to UPF in same subnet',
+                            suggestion: 'Deploy UPF in the same subnet range'
+                        });
+                    }
                 }
             }
             return; // ext-dn only connects to UPF, exit here
@@ -1087,6 +1141,7 @@ class NFManager {
         // Auto-connection logic based on 5G architecture
         const autoConnectionRules = this.getAutoConnectionRules();
         const rulesToApply = autoConnectionRules[nf.type] || [];
+        const sbiFTypes = this.getSBINFTypes();
 
         let connectionsCreated = 0;
         let connectionsBlocked = 0;
@@ -1096,36 +1151,40 @@ class NFManager {
             const targetNFs = sameSubnetStableNFs.filter(target => target.type === targetType);
             
             if (targetNFs.length > 0) {
-                // Connect to the first available target of this type in same subnet
                 const targetNF = targetNFs[0];
-                
-                // Check if connection already exists
-                const existingConnections = window.dataStore.getConnectionsForNF(nf.id);
-                const alreadyConnected = existingConnections.some(conn => 
-                    conn.sourceId === targetNF.id || conn.targetId === targetNF.id
-                );
 
-                if (!alreadyConnected && window.connectionManager) {
-                    // Create visual auto-connection (with visible interface line)
-                    const connection = window.connectionManager.createManualConnection(nf.id, targetNF.id);
-                    if (connection) {
-                        connectionsCreated++;
-                        console.log(`✅ Auto-connected ${nf.name} → ${targetNF.name} (same subnet: ${sourceNetwork}.0/24)`);
-                        
-                        // Log auto-connection with subnet info
-                        if (window.logEngine) {
-                            window.logEngine.addLog(nf.id, 'SUCCESS',
-                                `Auto-connected to ${targetNF.name} (interface: ${connection.interfaceName})`, {
-                                targetType: targetNF.type,
-                                interface: connection.interfaceName,
-                                autoConnection: true,
-                                visualConnection: true,
-                                subnet: sourceNetwork + '.0/24',
-                                sourceIP: nf.config.ipAddress,
-                                targetIP: targetNF.config.ipAddress,
-                                reason: '5G architecture requirement + subnet restriction',
-                                note: 'Visual interface connection established and shown on canvas'
-                            });
+                // Decide: bus connection or direct reference-point line?
+                const bothAreSBI = sbiFTypes.includes(nf.type) && sbiFTypes.includes(targetType);
+
+                if (bothAreSBI) {
+                    // SBI pair — connect both NFs to the shared service bus (no direct line)
+                    this._connectNFToBus(nf);
+                    this._connectNFToBus(targetNF);
+                    connectionsCreated++;
+                } else {
+                    // Non-SBI reference point — draw a direct line
+                    const existingConnections = window.dataStore.getConnectionsForNF(nf.id);
+                    const alreadyConnected = existingConnections.some(conn => 
+                        conn.sourceId === targetNF.id || conn.targetId === targetNF.id
+                    );
+
+                    if (!alreadyConnected && window.connectionManager) {
+                        const connection = window.connectionManager.createManualConnection(nf.id, targetNF.id);
+                        if (connection) {
+                            connectionsCreated++;
+                            console.log(`✅ Auto-connected ${nf.name} → ${targetNF.name} (${connection.interfaceName})`);
+
+                            if (window.logEngine) {
+                                window.logEngine.addLog(nf.id, 'SUCCESS',
+                                    `Auto-connected to ${targetNF.name} (interface: ${connection.interfaceName})`, {
+                                    targetType: targetNF.type,
+                                    interface: connection.interfaceName,
+                                    autoConnection: true,
+                                    subnet: sourceNetwork + '.0/24',
+                                    sourceIP: nf.config.ipAddress,
+                                    targetIP: targetNF.config.ipAddress,
+                                });
+                            }
                         }
                     }
                 }
@@ -1168,31 +1227,26 @@ class NFManager {
     }
 
     /**
-     * Auto-start ext-dn when UPF becomes stable and auto-connect it
+     * Auto-start ext-dn when UPF becomes stable and auto-connect it (WITH RETRY LOGIC)
      * @param {Object} upf - UPF network function that just became stable
      */
     autoStartExtDNForUPF(upf) {
-        // Check if UPF still exists
-        if (!window.dataStore?.getNFById(upf.id) || upf.status !== 'stable') {
-            return;
-        }
+        // Always read fresh UPF from dataStore to get current status
+        const freshUPF = window.dataStore?.getNFById(upf.id);
+        if (!freshUPF) return;
 
         // Check if ext-dn already exists in same subnet
         const allNFs = window.dataStore.getAllNFs();
-        const upfNetwork = this.getNetworkFromIP(upf.config.ipAddress);
-        const existingExtDN = allNFs.find(nf => 
-            nf.type === 'ext-dn' && 
+        const upfNetwork = this.getNetworkFromIP(freshUPF.config.ipAddress);
+        const existingExtDN = allNFs.find(nf =>
+            nf.type === 'ext-dn' &&
             this.getNetworkFromIP(nf.config.ipAddress) === upfNetwork
         );
 
         if (existingExtDN) {
             console.log(`ℹ️ ext-dn already exists in same subnet as UPF: ${existingExtDN.name}`);
-            // Try to connect if not already connected
-            setTimeout(() => {
-                if (existingExtDN.status === 'stable') {
-                    this.attemptAutoConnections(existingExtDN);
-                }
-            }, 6000); // Wait for ext-dn to be stable if it's still starting
+            // Try to connect with retry logic
+            this.ensureExtDNConnection(freshUPF, existingExtDN, 0);
             return;
         }
 
@@ -1256,24 +1310,109 @@ class NFManager {
     }
 
     /**
+     * Ensure ext-dn and UPF are connected with retry logic (HANDLES TIMING ISSUES)
+     * @param {Object} upf - UPF network function
+     * @param {Object} extDN - ext-dn network function
+     * @param {number} retryCount - Current retry attempt
+     */
+    ensureExtDNConnection(upf, extDN, retryCount = 0) {
+        // Read fresh instances from dataStore
+        const freshUPF = window.dataStore?.getNFById(upf.id);
+        const freshExtDN = window.dataStore?.getNFById(extDN.id);
+
+        if (!freshUPF || !freshExtDN) {
+            console.error('❌ UPF or ext-dn was deleted');
+            return;
+        }
+
+        console.log(`🔗 Attempting UPF ↔ ext-dn connection (attempt ${retryCount + 1}): UPF=${freshUPF.status}, ext-dn=${freshExtDN.status}`);
+
+        // Both must be stable to connect
+        if (freshUPF.status === 'stable' && freshExtDN.status === 'stable') {
+            // Check if connection already exists
+            const existingConnections = window.dataStore.getConnectionsForNF(freshExtDN.id);
+            const alreadyConnected = existingConnections.some(conn => 
+                conn.sourceId === freshUPF.id || conn.targetId === freshUPF.id
+            );
+
+            if (!alreadyConnected && window.connectionManager) {
+                const connection = window.connectionManager.createManualConnection(freshExtDN.id, freshUPF.id);
+                if (connection) {
+                    console.log(`✅ Connection established: ${freshExtDN.name} ↔ ${freshUPF.name} (N6 interface)`);
+                    
+                    if (window.logEngine) {
+                        window.logEngine.addLog(freshExtDN.id, 'SUCCESS',
+                            `Connected to ${freshUPF.name} for external data network traffic (N6)`, {
+                            interface: connection.interfaceName,
+                            sourceIP: freshExtDN.config.ipAddress,
+                            targetIP: freshUPF.config.ipAddress,
+                            subnet: this.getNetworkFromIP(freshExtDN.config.ipAddress) + '.0/24'
+                        });
+                    }
+
+                    // Re-render canvas
+                    if (window.canvasRenderer) {
+                        window.canvasRenderer.render();
+                    }
+                    return; // Success!
+                }
+            } else if (alreadyConnected) {
+                console.log(`ℹ️ UPF and ext-dn already connected`);
+                return;
+            }
+        }
+
+        // Not ready yet - retry with exponential backoff (up to 5 attempts)
+        if (retryCount < 5) {
+            const retryDelay = 2000 * (retryCount + 1); // 2s, 4s, 6s, 8s, 10s
+            console.log(`⏳ UPF or ext-dn not ready. Retrying in ${retryDelay}ms (${retryCount + 1}/5)`);
+            setTimeout(() => {
+                this.ensureExtDNConnection(upf, extDN, retryCount + 1);
+            }, retryDelay);
+        } else {
+            console.error(`❌ Failed to connect UPF and ext-dn after 5 retries`);
+            if (window.logEngine) {
+                window.logEngine.addLog(upf.id, 'ERROR',
+                    `Failed to establish ext-dn ↔ UPF connection after multiple retries`, {
+                    upfStatus: freshUPF.status,
+                    extDNStatus: freshExtDN.status,
+                    attempts: 5,
+                    suggestion: 'Check that both services are running'
+                });
+            }
+        }
+    }
+
+    /**
      * Get auto-connection rules based on 5G architecture
      * @returns {Object} Connection rules for each NF type
      */
     getAutoConnectionRules() {
         return {
+            // SBI NFs connect via the service bus — no direct lines
+            // Non-SBI connections (reference points) use direct lines
             'AMF': [],       // AMF doesn't initiate connections (gNB connects to AMF)
-            'SMF': ['NRF', 'UPF', 'PCF'],
-            'UPF': ['SMF'],  // UPF connects to SMF when available (gNB will connect to UPF)
-            'AUSF': ['NRF', 'UDM'],
-            'UDM': ['NRF', 'UDR'],  // UDM connects to UDR for subscriber profile management
-            'PCF': ['NRF'],
-            'NSSF': ['NRF'],
-            'UDR': ['NRF', 'UDM'],  // UDR connects to UDM and MySQL
-            'gNB': ['AMF', 'UPF'],  // gNB connects to AMF and UPF when available
-            'UE': ['gNB', 'AMF'], // UE connects to gNB and AMF when available (no direct UPF connection)
-            'MySQL': ['UDR'], // MySQL connects to UDR (database backend)
-            'ext-dn': ['UPF'] // ext-dn connects to UPF for internet traffic
+            'SMF': ['UPF'],  // N4 is a direct reference point; NRF/PCF go via bus
+            'UPF': ['SMF'],  // N4 direct; gNB and ext-dn will connect to UPF separately
+            'AUSF': [],      // AUSF communicates via bus (Nausf SBI)
+            'UDM': ['UDR'],  // Nudr_DataRepository is a direct reference point
+            'PCF': [],       // PCF communicates via bus (Npcf SBI)
+            'NSSF': [],      // NSSF communicates via bus (Nnssf SBI)
+            'UDR': ['UDM'],  // Nudr_DataRepository direct; NRF goes via bus
+            'gNB': ['AMF', 'UPF'],  // N2 and N3 are direct reference points
+            'UE': ['gNB', 'AMF'],   // Radio and N1 are direct reference points
+            'MySQL': ['UDR'],       // SQL/REST API is a direct connection
+            'ext-dn': ['UPF']       // N6 is a direct reference point
         };
+    }
+
+    /**
+     * NF types that communicate via the Service Bus (SBI) rather than direct lines.
+     * When these NFs become stable they should be connected to the bus, not to each
+     * other with point-to-point lines.
+     */
+    getSBINFTypes() {
+        return ['NRF', 'AMF', 'SMF', 'AUSF', 'UDM', 'PCF', 'NSSF', 'UDR'];
     }
 
     /**
@@ -1285,9 +1424,9 @@ class NFManager {
         switch (status) {
             case 'starting': return '#e74c3c'; // Red
             case 'stable': return '#2ecc71';   // Green
+            case 'stopped': return '#e74c3c';  // Red (same as starting)
             case 'error': return '#e67e22';    // Orange
-            case 'stopped': return '#95a5a6';  // Gray
-            default: return '#3498db';         // Blue
+            default: return '#95a5a6';         // Gray
         }
     }
 
@@ -1332,6 +1471,42 @@ class NFManager {
         const ue = window.dataStore?.getNFById(ueId);
         if (!ue || ue.type !== 'UE') {
             console.error('❌ UE not found:', ueId);
+            return false;
+        }
+
+        // GUARD: Check if core network, gNB, and UE are all deployed and stable
+        const allNFs = window.dataStore?.getAllNFs() || [];
+        const requiredTypes = ['NRF', 'AMF', 'SMF', 'UPF', 'AUSF', 'UDM', 'UDR', 'gNB'];
+        const missingOrNotStable = [];
+
+        requiredTypes.forEach(type => {
+            const nf = allNFs.find(n => n.type === type);
+            if (!nf) {
+                missingOrNotStable.push(`${type} (not deployed)`);
+            } else if (nf.status !== 'stable') {
+                missingOrNotStable.push(`${type} (status: ${nf.status})`);
+            }
+        });
+
+        if (missingOrNotStable.length > 0) {
+            const errorMsg = `PDU Session blocked: Core network not ready`;
+            console.error(`❌ ${errorMsg}:`, missingOrNotStable.join(', '));
+            
+            if (window.logEngine) {
+                window.logEngine.addLog(ue.id, 'ERROR', errorMsg, {
+                    reason: 'Required network functions are missing or not stable',
+                    missing: missingOrNotStable.join(', '),
+                    required: requiredTypes.join(', '),
+                    instruction: 'Deploy all core NFs (NRF, AMF, SMF, UPF, AUSF, UDM, UDR) and gNB first, then wait for them to become stable (green status)'
+                });
+            }
+
+            alert(`❌ PDU Session Establishment Blocked!\n\n` +
+                  `The following network functions are missing or not stable:\n\n` +
+                  `${missingOrNotStable.join('\n')}\n\n` +
+                  `Please deploy the complete 5G core network (NRF, AMF, SMF, UPF, AUSF, UDM, UDR) and gNB, ` +
+                  `then wait for all services to become stable (green status indicator) before establishing a PDU session.`);
+            
             return false;
         }
 
