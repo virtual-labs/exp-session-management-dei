@@ -71,12 +71,14 @@ watch docker compose -f docker-compose.yml ps -a
 
 <img src="images/prd7.png" width="90%">
 
-*Fig: Core Network Deployment*
+*Fig: One Click Core Network Deployment*
 
 
 **Option C (Manual):** Manually add each Network Function from Network function panel then enter configuration detail in the left configuration panel and start NF.
 
+<img src="images/prd17.png" width="90%">
 
+*Fig: Core Network Deployment*
 
 ---
 
