@@ -2964,16 +2964,7 @@ class UIController {
             this.addTerminalLine(output, line, 'info');
         });
 
-        // Procedures link
-        const linkLine = document.createElement('div');
-        linkLine.className = 'terminal-line terminal-info';
-        linkLine.innerHTML = '  For full details: <a href="../procedure.md" target="_blank" style="color:#58a6ff;text-decoration:underline;">View Procedures</a>';
-        const activeInputLine = output.querySelector('.terminal-active-input');
-        if (activeInputLine) {
-            output.insertBefore(linkLine, activeInputLine);
-        } else {
-            output.appendChild(linkLine);
-        }
+        
     }
 
     /**
