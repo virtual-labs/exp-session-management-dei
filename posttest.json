@@ -1,0 +1,263 @@
+{
+  "version": 2.0,
+  "filters": {
+    "difficulty": ["beginner", "intermediate"]
+  },
+  "questions": [
+    {
+      "question": "Q1. When an NF registers successfully, what HTTP status is returned?",
+      "answers": {
+        "a": "200",
+        "b": "201",
+        "c": "404",
+        "d": "500"
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q2. First step in experiment?",
+      "answers": {
+        "a": "Enter IP",
+        "b": "Create New Service",
+        "c": "Check logs",
+        "d": "Select services"
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q3. Common registration failure cause?",
+      "answers": {
+        "a": "UUID",
+        "b": "JSON length",
+        "c": "Missing Content-Type",
+        "d": "HTTP version"
+      },
+      "correctAnswer": "c",
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Correct.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q4. Final deployment step?",
+      "answers": {
+        "a": "Start Service",
+        "b": "Validate",
+        "c": "Wait",
+        "d": "Open Terminal"
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Correct.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q5. How to verify deployment?",
+      "answers": {
+        "a": "Logs",
+        "b": "ipconfig",
+        "c": "Help",
+        "d": "Scroll"
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Correct.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q6. Avoid conflict in second service?",
+      "answers": {
+        "a": "Protocol",
+        "b": "Name",
+        "c": "Description",
+        "d": "IP"
+      },
+      "correctAnswer": "d",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Correct."
+      }
+    },
+    {
+      "question": "Q7. HTTP/2 advantage?",
+      "answers": {
+        "a": "Multiple connections",
+        "b": "Parallel streams",
+        "c": "Manual reconnect",
+        "d": "Delay"
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q8. Success status in logs?",
+      "answers": {
+        "a": "SUCCESS",
+        "b": "PENDING",
+        "c": "INIT",
+        "d": "CONNECTED"
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Correct.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q9. Purpose of terminal?",
+      "answers": {
+        "a": "Logs",
+        "b": "Change IP",
+        "c": "Reboot",
+        "d": "Run ping"
+      },
+      "correctAnswer": "d",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Correct."
+      }
+    },
+    {
+      "question": "Q10. Discovery returns?",
+      "answers": {
+        "a": "Devices",
+        "b": "Service instances",
+        "c": "Containers",
+        "d": "Hardware"
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q11. Ping success indicator?",
+      "answers": {
+        "a": "0% loss",
+        "b": "Packets sent",
+        "c": "RTT",
+        "d": "Min time"
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Correct.",
+        "b": "Incorrect.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q12. heartBeatTimer role?",
+      "answers": {
+        "a": "Format",
+        "b": "Keep-alive",
+        "c": "Latency",
+        "d": "Shutdown"
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q13. New service behavior?",
+      "answers": {
+        "a": "Reconfig",
+        "b": "Auto discover",
+        "c": "Reboot",
+        "d": "Manual IP"
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q14. SBA modular proof?",
+      "answers": {
+        "a": "All fail",
+        "b": "Independent NFs",
+        "c": "Static config",
+        "d": "Blocked"
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q15. Successful response HTTP code?",
+      "answers": {
+        "a": "404",
+        "b": "200",
+        "c": "500",
+        "d": "301"
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    }
+  ]
+}
