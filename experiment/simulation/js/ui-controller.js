@@ -2694,7 +2694,6 @@ class UIController {
             'clear',
             'exit',
             'ping ',
-            'ping subnet',
             'iperf3 -s',
             'iperf3 -B ',
         ];
@@ -2888,8 +2887,6 @@ class UIController {
             } else {
                 this.addTerminalLine(output, 'Usage: ping <hostname or IP address>', 'error');
             }
-        } else if (cmd === 'ping subnet') {
-            await this.executeWindowsPingSubnet(nf, output);
         } else if (cmd === 'cls' || cmd === 'clear') {
             const activeInputLine = output.querySelector('.terminal-active-input');
             output.innerHTML = '';
@@ -2948,7 +2945,6 @@ class UIController {
             'Quick Procedures:',
             '',
             '  ping <IP>        - Test connectivity to an IP',
-            '  ping subnet      - Ping all NFs in the subnet',
             '  ipconfig         - Show network config',
             '  ifconfig         - Show interfaces (Linux style)',
             '  netstat          - Show network connections',
@@ -3231,63 +3227,6 @@ class UIController {
         // Show statistics after final delay
         await this.delay(500);
         this.showPingStatistics(target, results, output);
-    }
-
-    /**
-     * Execute ping subnet with detailed subnet information
-     * @param {Object} nf - Network Function
-     * @param {HTMLElement} output - Output element
-     */
-    async executeWindowsPingSubnet(nf, output) {
-        const sourceNetwork = this.getNetworkFromIP(nf.config.ipAddress);
-        const allNFs = window.dataStore?.getAllNFs() || [];
-        
-        // Find services in the same subnet only
-        const sameSubnetServices = allNFs.filter(otherNf => 
-            otherNf.id !== nf.id && 
-            this.getNetworkFromIP(otherNf.config.ipAddress) === sourceNetwork
-        );
-
-        // Show subnet scan header
-        this.addTerminalLine(output, `Subnet Scan: ${sourceNetwork}.0/24`, 'info');
-        this.addTerminalLine(output, `Source: ${nf.name} (${nf.config.ipAddress})`, 'info');
-        this.addTerminalLine(output, `Restriction: Only same-subnet services can be pinged`, 'info');
-        this.addTerminalLine(output, '', 'blank');
-
-        if (sameSubnetServices.length === 0) {
-            this.addTerminalLine(output, `No other services found in subnet ${sourceNetwork}.0/24`, 'error');
-            this.addTerminalLine(output, `Add more services with IPs in range ${sourceNetwork}.1-${sourceNetwork}.254`, 'info');
-            return;
-        }
-
-        this.addTerminalLine(output, `Found ${sameSubnetServices.length} services in subnet ${sourceNetwork}.0/24:`, 'info');
-        
-        // List all services in subnet first
-        sameSubnetServices.forEach(targetNf => {
-            const statusIcon = targetNf.status === 'stable' ? '✅' : '⚠️';
-            this.addTerminalLine(output, `  ${statusIcon} ${targetNf.name} (${targetNf.config.ipAddress}) [${targetNf.status.toUpperCase()}]`, 'info');
-        });
-        
-        this.addTerminalLine(output, '', 'blank');
-        this.addTerminalLine(output, 'Starting connectivity tests...', 'info');
-        this.addTerminalLine(output, '', 'blank');
-
-        // Test each service
-        for (const targetNf of sameSubnetServices) {
-            const statusInfo = targetNf.status === 'stable' ? 'STABLE' : targetNf.status.toUpperCase();
-            this.addTerminalLine(output, `Testing ${targetNf.name} (${targetNf.config.ipAddress}) [${statusInfo}]`, 'info');
-            await this.executeWindowsPing(nf, targetNf.config.ipAddress, output);
-            this.addTerminalLine(output, '', 'blank');
-            await this.delay(200);
-        }
-
-        // Summary
-        this.addTerminalLine(output, '═══════════════════════════════════════', 'info');
-        this.addTerminalLine(output, `Subnet scan completed for ${sourceNetwork}.0/24`, 'success');
-        this.addTerminalLine(output, `Total services tested: ${sameSubnetServices.length}`, 'info');
-        this.addTerminalLine(output, `Stable services: ${sameSubnetServices.filter(nf => nf.status === 'stable').length}`, 'info');
-        this.addTerminalLine(output, `Unstable services: ${sameSubnetServices.filter(nf => nf.status !== 'stable').length}`, 'info');
-        this.addTerminalLine(output, '═══════════════════════════════════════', 'info');
     }
 
     /**
