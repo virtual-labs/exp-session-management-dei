@@ -29,7 +29,7 @@ Once your core network is up and running, it's time to deploy the gNB (Base Stat
 
 ### Deploy UE (User Equipment) Services
 
-Now it's time to bring the end users into the network! This command starts up the UE (User Equipment) containers and connects them to the gNB. The UEs are essentially the "phones" or "devices" in your 5G network simulation.
+This command starts up the UE (User Equipment) containers and connects them to the gNB. The UEs are essentially the "phones" or "devices" in your 5G network simulation.
 
 ```bash
 docker compose -f docker-compose-ue.yml up -d
@@ -47,7 +47,7 @@ docker compose -f docker-compose-ue.yml up -d
 
 ### View All Running Containers
 
-Want to see what's actually running? This command shows you a complete list of all containers that Docker is currently running — including their IDs, status, and names. It's your way of checking "is everything up and running?"
+This command shows you a complete list of all containers that Docker is currently running — including their IDs, status, and names. "
 
 ```bash
 docker ps
@@ -58,7 +58,7 @@ docker ps
 
 ### Live Monitoring Dashboard for Core Network
 
-This is like setting up a live dashboard that refreshes every 2 seconds, showing you the real-time status of all your core network containers. It's perfect for keeping an eye on things while everything is running — you can see if any containers crash or their status changes without needing to run the command over and over.
+This command shows you the real-time status of all your core network containers. 
 
 ```bash
 watch docker compose -f docker-compose.yml ps -a

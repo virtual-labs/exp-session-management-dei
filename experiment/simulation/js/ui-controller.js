@@ -25,6 +25,9 @@ class UIController {
         this.pduCurrentStep = 0;
         this.pduSessionData = null;
 
+        // One-click deployment state
+        this.isOneClickDeploying = false;
+
         console.log('✅ UIController initialized');
     }
 
@@ -161,6 +164,10 @@ class UIController {
 
             // Click to add NF
             item.addEventListener('click', () => {
+                if (this.isOneClickDeploying) {
+                    alert('⚠️ One-click deployment is in progress! Please wait for it to complete before adding NFs manually.');
+                    return;
+                }
                 console.log('🖱️ Palette item clicked:', type);
                 this.createNFFromPalette(type);
             });
@@ -174,6 +181,10 @@ class UIController {
      * @param {string} type - NF type
      */
     createNFFromPalette(type) {
+        if (this.isOneClickDeploying) {
+            alert('⚠️ One-click deployment is in progress! Please wait for it to complete before adding NFs manually.');
+            return;
+        }
         console.log('🖱️ Palette item clicked:', type);
         // NEW: Show configuration panel first, don't create NF yet
         this.showNFConfigurationForNewNF(type);
@@ -194,6 +205,10 @@ class UIController {
         }
 
         addNFBtn.addEventListener('click', () => {
+            if (this.isOneClickDeploying) {
+                alert('⚠️ One-click deployment is in progress! Please wait for it to complete before adding NFs manually.');
+                return;
+            }
             console.log('🖱️ Add NF button clicked');
             this.showAddNFModal();
         });
@@ -236,6 +251,10 @@ class UIController {
 
             // Click handler - NEW WORKFLOW: Show config first
             btn.addEventListener('click', () => {
+                if (this.isOneClickDeploying) {
+                    alert('⚠️ One-click deployment is in progress! Please wait for it to complete before adding NFs manually.');
+                    return;
+                }
                 console.log('🖱️ Modal: Selected NF type:', type);
 
                 // NEW: Show configuration panel first, don't create NF yet
@@ -745,6 +764,10 @@ class UIController {
      * @param {string} nfType - NF type to configure
      */
     showNFConfigurationForNewNF(nfType) {
+        if (this.isOneClickDeploying) {
+            alert('⚠️ One-click deployment is in progress! Please wait for it to complete before adding NFs manually.');
+            return;
+        }
         const configForm = document.getElementById('config-form');
         if (!configForm) return;
 
@@ -919,6 +942,22 @@ class UIController {
                         protocolSelect.value = currentProtocol;
                     }
                 }
+            });
+        }
+
+        // Restrict IP input to digits and dots only
+        const ipInput = document.getElementById('config-ip');
+        if (ipInput) {
+            ipInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+            });
+        }
+
+        // Restrict port input to digits only
+        const portInput = document.getElementById('config-port');
+        if (portInput) {
+            portInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
             });
         }
 
@@ -1258,6 +1297,24 @@ class UIController {
             }
         }
 
+        // Restrict IP input to digits and dots only (only for non-UE NFs)
+        if (nf.type !== 'UE') {
+            const ipInput = document.getElementById('config-ip');
+            if (ipInput) {
+                ipInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+                });
+            }
+
+            // Restrict port input to digits only
+            const portInput = document.getElementById('config-port');
+            if (portInput) {
+                portInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                });
+            }
+        }
+
         // UE registration happens automatically when UE becomes stable
         // No manual button needed
 
@@ -1385,19 +1442,26 @@ class UIController {
 
         // Standard NF configuration
         const ipAddress = document.getElementById('config-ip')?.value;
-        const port = parseInt(document.getElementById('config-port')?.value);
+        const portStr = document.getElementById('config-port')?.value;
         const httpProtocol = document.getElementById('config-http-protocol')?.value;
 
-        if (!ipAddress || !port) {
-            alert('Please fill all required fields');
+        if (!ipAddress || !portStr) {
+            alert('❌ Please fill all required fields!');
             return;
         }
 
         // Validate IP address format
         if (!this.isValidIP(ipAddress)) {
-            alert('❌ Invalid IP address format!\n\nPlease enter a valid IP address (e.g., 192.168.1.20)');
+            alert('❌ Invalid IP address!\n\nPlease enter a valid IP address from 1.0.0.0 to 255.255.255.255. Only digits and dots are allowed.');
             return;
         }
+
+        // Validate port
+        if (!this.isValidPort(portStr)) {
+            alert('❌ Invalid port!\n\nPlease enter a valid port number (4 to 6 digits only, no symbols or characters).');
+            return;
+        }
+        const port = parseInt(portStr, 10);
 
         // Check for IP conflicts
         if (!window.nfManager?.isIPAddressAvailable(ipAddress)) {
@@ -1644,19 +1708,26 @@ class UIController {
 
         // Standard NF configuration
         const ipAddress = document.getElementById('config-ip')?.value;
-        const port = parseInt(document.getElementById('config-port')?.value);
+        const portStr = document.getElementById('config-port')?.value;
         const httpProtocol = document.getElementById('config-http-protocol')?.value;
 
-        if (!ipAddress || !port) {
-            alert('Please fill all required fields');
+        if (!ipAddress || !portStr) {
+            alert('❌ Please fill all required fields!');
             return;
         }
 
         // Validate IP address format
         if (!this.isValidIP(ipAddress)) {
-            alert('❌ Invalid IP address format!\n\nPlease enter a valid IP address (e.g., 192.168.1.20)');
+            alert('❌ Invalid IP address!\n\nPlease enter a valid IP address from 1.0.0.0 to 255.255.255.255. Only digits and dots are allowed.');
             return;
         }
+
+        // Validate port
+        if (!this.isValidPort(portStr)) {
+            alert('❌ Invalid port!\n\nPlease enter a valid port number (4 to 6 digits only, no symbols or characters).');
+            return;
+        }
+        const port = parseInt(portStr, 10);
 
         // Check for IP conflicts (excluding current NF)
         if (nf.config.ipAddress !== ipAddress) {
@@ -1956,152 +2027,162 @@ class UIController {
      * Execute step-by-step deployment of Core Topology
      */
     async deployCoreSequence() {
+        if (this.isOneClickDeploying) {
+            alert('⚠️ One-click deployment is already in progress! Please wait for it to complete.');
+            return;
+        }
+
         if (!confirm('⚠️ This will CLEAR the current topology and deploy the 5G Core Network.\n\nAre you sure you want to proceed?')) {
             return;
         }
 
+        this.isOneClickDeploying = true;
         console.log('🚀 Starting One-Click Core Deployment...');
         
-        // 1. Fetch Logs first
-        let logsData = { logs: [] };
         try {
-            // Fix: path needs to be relative to index.html location
-            const response = await fetch('../5g-logs.json'); 
-            if (response.ok) {
-                logsData = await response.json();
-                console.log('📄 Loaded logs:', logsData.logs.length, 'entries');
-                
-                // Debug: check if we have gNB logs
-                const gnbLogs = logsData.logs.filter(l => l.nfId && l.nfId.toLowerCase().includes('gnb'));
-                console.log('📄 gNB logs found:', gnbLogs.length);
-            } else {
-                console.warn('⚠️ Could not load 5g-logs.json - Status:', response.status);
-            }
-        } catch (e) {
-            console.error('❌ Error loading logs:', e);
-        }
-
-        // 2. Clear existing topology
-        if (window.dataStore) {
-            window.dataStore.clearAll();
-        }
-        if (window.logEngine) {
-            window.logEngine.clearAllLogs();
-            window.logEngine.addLog('system', 'INFO', 'Starting 5G Core Deployment Sequence...');
-        }
-
-        const topology = this.getCoreOneClickTopology();
-        const STEP_DELAY = 1500; // Increased delay as requested
-        const LOG_DELAY = 100;
-
-        // Helper to sleep
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-        // Helper to find logs for a specific NF type/name
-        // We map the static IDs from logs to the dynamic sequence
-        const getLogsForType = (type, name) => {
-            return logsData.logs.filter(log => {
-                if (!log.nfId) return false;
-                if (log.nfId === 'system') return false;
-
-                // Robust matching:
-                // 1. Try generic type prefix (e.g. 'nrf-', 'gnb-')
-                if (log.nfId.toLowerCase().startsWith(type.toLowerCase() + '-')) return true;
-                
-                // 2. Try matching by name if available in log details or ID
-                if (name && log.nfId.toLowerCase().includes(name.toLowerCase())) return true;
-
-                return false;
-            });
-        };
-
-        // 3. Deploy Buses first (Immediate)
-        if (topology.buses && topology.buses.length > 0) {
-            console.log('🚌 Deploying Buses...');
-            topology.buses.forEach(bus => {
-                if (window.dataStore) window.dataStore.addBus(bus);
-                if (window.logEngine) window.logEngine.addLog('system', 'INFO', `Deployed ${bus.name}`);
-            });
-            if (window.canvasRenderer) window.canvasRenderer.render();
-            await sleep(1000);
-        }
-
-        // 4. Deploy NFs & Simultaneous Bus Connections
-        if (topology.nfs && topology.nfs.length > 0) {
-            for (const nf of topology.nfs) {
-                try {
-                    console.log('📦 Deploying NF:', nf.name);
+            // 1. Fetch Logs first
+            let logsData = { logs: [] };
+            try {
+                // Fix: path needs to be relative to index.html location
+                const response = await fetch('../5g-logs.json'); 
+                if (response.ok) {
+                    logsData = await response.json();
+                    console.log('📄 Loaded logs:', logsData.logs.length, 'entries');
                     
-                    // Add NF
-                    if (window.dataStore) window.dataStore.addNF(nf);
+                    // Debug: check if we have gNB logs
+                    const gnbLogs = logsData.logs.filter(l => l.nfId && l.nfId.toLowerCase().includes('gnb'));
+                    console.log('📄 gNB logs found:', gnbLogs.length);
+                } else {
+                    console.warn('⚠️ Could not load 5g-logs.json - Status:', response.status);
+                }
+            } catch (e) {
+                console.error('❌ Error loading logs:', e);
+            }
 
-                    // Find and Add Simultaneous Bus Connection
-                    const busConn = topology.busConnections ? topology.busConnections.find(bc => bc.nfId === nf.id) : null;
-                    if (busConn) {
-                        if (window.dataStore) window.dataStore.addBusConnection(busConn);
-                        console.log('🔌 Auto-connected to bus:', nf.name);
-                    }
+            // 2. Clear existing topology
+            if (window.dataStore) {
+                window.dataStore.clearAll();
+            }
+            if (window.logEngine) {
+                window.logEngine.clearAllLogs();
+                window.logEngine.addLog('system', 'INFO', 'Starting 5G Core Deployment Sequence...');
+            }
 
-                    // Render update
-                    if (window.canvasRenderer) window.canvasRenderer.render();
+            const topology = this.getCoreOneClickTopology();
+            const STEP_DELAY = 1500; // Increased delay as requested
+            const LOG_DELAY = 100;
 
-                    // Play relevant logs for this NF
-                    const validLogs = getLogsForType(nf.type, nf.name);
-                    // Sort by timestamp to ensure sequence
-                    validLogs.sort((a, b) => a.timestamp - b.timestamp);
+            // Helper to sleep
+            const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-                    if (validLogs.length > 0) {
-                        for (const log of validLogs) {
-                            if (window.logEngine) {
-                                // Use the log's original data
-                                window.logEngine.addLog(nf.id, log.level || 'INFO', log.message, log.details);
-                            }
-                            await sleep(LOG_DELAY); // Check tiny delay between logs for effect
-                        }
-                    } else {
-                        // Fallback log if no logs found in file
-                        if (window.logEngine) window.logEngine.addLog(nf.id, 'INFO', `${nf.name} deployed`, { type: nf.type });
-                    }
+            // Helper to find logs for a specific NF type/name
+            // We map the static IDs from logs to the dynamic sequence
+            const getLogsForType = (type, name) => {
+                return logsData.logs.filter(log => {
+                    if (!log.nfId) return false;
+                    if (log.nfId === 'system') return false;
 
-                    // Wait for the main step delay before next NF
-                    await sleep(STEP_DELAY);
+                    // Robust matching:
+                    // 1. Try generic type prefix (e.g. 'nrf-', 'gnb-')
+                    if (log.nfId.toLowerCase().startsWith(type.toLowerCase() + '-')) return true;
+                    
+                    // 2. Try matching by name if available in log details or ID
+                    if (name && log.nfId.toLowerCase().includes(name.toLowerCase())) return true;
 
-                    // 5. Deploy Direct Connections relevant to this NF (Outgoing)
-                    // We do this AFTER the NF is fully established (simulated by delay)
-                    if (topology.connections) {
-                        // Find connections where this NF is the Source
-                        const relevantConnections = topology.connections.filter(c => c.sourceId === nf.id);
+                    return false;
+                });
+            };
+
+            // 3. Deploy Buses first (Immediate)
+            if (topology.buses && topology.buses.length > 0) {
+                console.log('🚌 Deploying Buses...');
+                topology.buses.forEach(bus => {
+                    if (window.dataStore) window.dataStore.addBus(bus);
+                    if (window.logEngine) window.logEngine.addLog('system', 'INFO', `Deployed ${bus.name}`);
+                });
+                if (window.canvasRenderer) window.canvasRenderer.render();
+                await sleep(1000);
+            }
+
+            // 4. Deploy NFs & Simultaneous Bus Connections
+            if (topology.nfs && topology.nfs.length > 0) {
+                for (const nf of topology.nfs) {
+                    try {
+                        console.log('📦 Deploying NF:', nf.name);
                         
-                        if (relevantConnections.length > 0) {
-                            for (const conn of relevantConnections) {
-                                // Fix: Use getNFById instead of non-existent getNF
-                                // Also handle cases where target might be a bus (unlikely for direct connection) or not yet exists
-                                const source = window.dataStore ? window.dataStore.getNFById(conn.sourceId) : null;
-                                const target = window.dataStore ? window.dataStore.getNFById(conn.targetId) : null;
-                                
-                                // Only add if both exist. 
-                                // Note: In strict ordered deployment, target should exist IF it was earlier in the list.
-                                // If target is later in the list (e.g. circular dependency), we skip for now. 
-                                // But one-click.json is usually ordered topologically.
-                                if (source && target) {
-                                    if (window.dataStore) window.dataStore.addConnection(conn);
-                                    if (window.canvasRenderer) window.canvasRenderer.render();
-                                    await sleep(500); // Small delay for connection animation
+                        // Add NF
+                        if (window.dataStore) window.dataStore.addNF(nf);
+
+                        // Find and Add Simultaneous Bus Connection
+                        const busConn = topology.busConnections ? topology.busConnections.find(bc => bc.nfId === nf.id) : null;
+                        if (busConn) {
+                            if (window.dataStore) window.dataStore.addBusConnection(busConn);
+                            console.log('🔌 Auto-connected to bus:', nf.name);
+                        }
+
+                        // Render update
+                        if (window.canvasRenderer) window.canvasRenderer.render();
+
+                        // Play relevant logs for this NF
+                        const validLogs = getLogsForType(nf.type, nf.name);
+                        // Sort by timestamp to ensure sequence
+                        validLogs.sort((a, b) => a.timestamp - b.timestamp);
+
+                        if (validLogs.length > 0) {
+                            for (const log of validLogs) {
+                                if (window.logEngine) {
+                                    // Use the log's original data
+                                    window.logEngine.addLog(nf.id, log.level || 'INFO', log.message, log.details);
+                                }
+                                await sleep(LOG_DELAY); // Check tiny delay between logs for effect
+                            }
+                        } else {
+                            // Fallback log if no logs found in file
+                            if (window.logEngine) window.logEngine.addLog(nf.id, 'INFO', `${nf.name} deployed`, { type: nf.type });
+                        }
+
+                        // Wait for the main step delay before next NF
+                        await sleep(STEP_DELAY);
+
+                        // 5. Deploy Direct Connections relevant to this NF (Outgoing)
+                        // We do this AFTER the NF is fully established (simulated by delay)
+                        if (topology.connections) {
+                            // Find connections where this NF is the Source
+                            const relevantConnections = topology.connections.filter(c => c.sourceId === nf.id);
+                            
+                            if (relevantConnections.length > 0) {
+                                for (const conn of relevantConnections) {
+                                    // Fix: Use getNFById instead of non-existent getNF
+                                    // Also handle cases where target might be a bus (unlikely for direct connection) or not yet exists
+                                    const source = window.dataStore ? window.dataStore.getNFById(conn.sourceId) : null;
+                                    const target = window.dataStore ? window.dataStore.getNFById(conn.targetId) : null;
+                                    
+                                    // Only add if both exist. 
+                                    // Note: In strict ordered deployment, target should exist IF it was earlier in the list.
+                                    // If target is later in the list (e.g. circular dependency), we skip for now. 
+                                    // But one-click.json is usually ordered topologically.
+                                    if (source && target) {
+                                        if (window.dataStore) window.dataStore.addConnection(conn);
+                                        if (window.canvasRenderer) window.canvasRenderer.render();
+                                        await sleep(500); // Small delay for connection animation
+                                    }
                                 }
                             }
                         }
+                    } catch (err) {
+                        console.error('❌ Error deploying NF:', nf.name, err);
+                        // Continue to next NF despite error
                     }
-                } catch (err) {
-                    console.error('❌ Error deploying NF:', nf.name, err);
-                    // Continue to next NF despite error
                 }
             }
-        }
 
-        // Final Message
-        console.log('✅ Core Deployment Completed');
-        if (window.logEngine) window.logEngine.addLog('system', 'SUCCESS', '5G Core Deployment Completed Successfully');
-        alert('✅ 5G Core Deployment Completed!');
+            // Final Message
+            console.log('✅ Core Deployment Completed');
+            if (window.logEngine) window.logEngine.addLog('system', 'SUCCESS', '5G Core Deployment Completed Successfully');
+            alert('✅ 5G Core Deployment Completed!');
+        } finally {
+            this.isOneClickDeploying = false;
+        }
     }
 
     /**
@@ -3440,7 +3521,23 @@ class UIController {
      */
     isValidIP(ip) {
         const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-        return ipRegex.test(ip);
+        if (!ipRegex.test(ip)) {
+            return false;
+        }
+        const octets = ip.split('.').map(Number);
+        if (octets[0] === 0) {
+            return false;
+        }
+        return true;
+    }
+
+    isValidPort(port) {
+        if (typeof port !== 'number' && typeof port !== 'string') {
+            return false;
+        }
+        const portStr = String(port);
+        const portRegex = /^\d{4,6}$/;
+        return portRegex.test(portStr);
     }
 
     /**
