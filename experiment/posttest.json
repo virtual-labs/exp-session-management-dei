@@ -175,24 +175,7 @@
       }
     },
     {
-      "question": "Q11. Ping success indicator?",
-      "answers": {
-        "a": "0% loss",
-        "b": "Packets sent",
-        "c": "RTT",
-        "d": "Min time"
-      },
-      "correctAnswer": "a",
-      "difficulty": "beginner",
-      "explanations": {
-        "a": "Correct.",
-        "b": "Incorrect.",
-        "c": "Incorrect.",
-        "d": "Incorrect."
-      }
-    },
-    {
-      "question": "Q12. heartBeatTimer role?",
+      "question": "Q11. heartBeatTimer role?",
       "answers": {
         "a": "Format",
         "b": "Keep-alive",
@@ -209,7 +192,7 @@
       }
     },
     {
-      "question": "Q13. New service behavior?",
+      "question": "Q12. New service behavior?",
       "answers": {
         "a": "Reconfig",
         "b": "Auto discover",
@@ -226,7 +209,7 @@
       }
     },
     {
-      "question": "Q14. SBA modular proof?",
+      "question": "Q13. SBA modular proof?",
       "answers": {
         "a": "All fail",
         "b": "Independent NFs",
@@ -243,15 +226,32 @@
       }
     },
     {
-      "question": "Q15. Successful response HTTP code?",
+      "question": "Q14. What does the network send the UE when a PDU session cannot be established?",
       "answers": {
-        "a": "404",
-        "b": "200",
-        "c": "500",
-        "d": "301"
+        "a": "PDU Session Establishment Accept",
+        "b": "PDU Session Establishment Reject",
+        "c": "Heartbeat message",
+        "d": "New IP address"
       },
       "correctAnswer": "b",
       "difficulty": "beginner",
+      "explanations": {
+        "a": "Incorrect.",
+        "b": "Correct.",
+        "c": "Incorrect.",
+        "d": "Incorrect."
+      }
+    },
+    {
+      "question": "Q15. What is the purpose of the back-off timer sent in a session reject message?",
+      "answers": {
+        "a": "Speed up UE reconnection",
+        "b": "Prevent immediate retry and avoid signaling overload",
+        "c": "Reset the UE IP address",
+        "d": "Trigger UPF reselection automatically"
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate",
       "explanations": {
         "a": "Incorrect.",
         "b": "Correct.",
