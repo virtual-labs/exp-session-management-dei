@@ -1,3 +1,6 @@
+> **Audio Explanation:** For a comprehensive understanding of these theoretical concepts, you can listen on YouTube. 
+> [**Click here to listen the audio**](https://youtu.be/hgcjjKvDe24)
+
 ## 1.  5G Session Management
 
 ### 1.1 Introduction to Session Management in 5G
