@@ -1,5 +1,8 @@
-> **Audio Explanation:** For a comprehensive understanding of these theoretical concepts, you can listen on YouTube. 
-> [**Click here to listen the audio**](https://youtu.be/hgcjjKvDe24)
+> **Audio Explanations:** For a more comprehensive understanding of these theoretical concepts, supplementary audio guides are available on YouTube.
+> 
+> - [**Listen in English**](https://youtu.be/NuB2WhbKPrc)
+> - [**Listen in Hindi**](https://youtu.be/hgcjjKvDe24)
+
 
 ## 1.  5G Session Management
 
