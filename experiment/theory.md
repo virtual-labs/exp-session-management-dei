@@ -34,9 +34,10 @@ This design allows:
 
 As illustrated in **Figure 1**, the high-level concept of session management within the 5G Core highlights the central role of the Session Management Function (SMF) in establishing connectivity between the User Equipment (UE) and external Data Networks via the Service-Based Architecture.
 
-<img src="images/fig-1.svg" width="45%">
-
-*Figure 1: Session management in 5G Core*
+<div align="center">
+  <img src="images/fig-1.svg" alt="Session management in 5G Core" width="45%">
+  <p><em>Figure 1: Session management in 5G Core</em></p>
+</div>
 
 ## 2. 5G Core Architecture for Session Management
 
@@ -84,9 +85,10 @@ Session management in 5G involves multiple network functions working together in
 - Helps in discovering available network functions  
 - Assists AMF in selecting appropriate SMF  
 
-<img src="images/fig-2.svg" width="45%">
-
-*Figure 2: 5G Core Architecture for Session Management*
+<div align="center">
+  <img src="images/fig-2.svg" alt="5G Core Architecture for Session Management" width="45%">
+  <p><em>Figure 2: 5G Core Architecture for Session Management</em></p>
+</div>
 
 ## 3. PDU Session Concepts
 
@@ -120,9 +122,10 @@ A **PDU Session** is a logical connection between the UE and a Data Network. **F
 - **QoS Flows**  
   Each session can contain multiple QoS flows with different priorities.
 
-<img src="images/fig-3.svg" width="45%">
-
-*Figure 3: PDU Session Structure*
+<div align="center">
+  <img src="images/fig-3.svg" alt="PDU Session Structure" width="45%">
+  <p><em>Figure 3: PDU Session Structure</em></p>
+</div>
 
 ## 4. PDU Session Establishment Process
 
@@ -203,9 +206,10 @@ Data flows:
 
 UE → gNB → UPF → Data Network
 
-<img src="images/fig-4.svg" width="50%">
-
-*Figure 4: PDU Session Establishment Flow*
+<div align="center">
+  <img src="images/fig-4.svg" alt="PDU Session Establishment Flow" width="50%">
+  <p><em>Figure 4: PDU Session Establishment Flow</em></p>
+</div>
 
 ## 5. Session Management Messages
 
@@ -230,9 +234,10 @@ Contains:
 - Selected slice  
 - DNS configuration  
 
-<img src="images/fig-5.svg" width="40%">
-
-*Figure 5: Session Management Messages*
+<div align="center">
+  <img src="images/fig-5.svg" alt="Session Management Messages" width="40%">
+  <p><em>Figure 5: Session Management Messages</em></p>
+</div>
 
 ## 6. QoS Management in 5G
 
@@ -327,9 +332,10 @@ When a PDU Session Establishment Request cannot be completed, the network return
 - A **back-off timer**, when applicable, instructing the UE how long to wait before retrying
 Similarly, modification attempts that fail return a **PDU Session Modification Reject**, and abnormal releases are signaled via a **PDU Session Release Command** with an associated cause code. **Figure 6** illustrates the signaling and decision processes involved when a session encounters a failure, detailing how reject messages convey cause codes and back-off timers to manage UE retry behaviors efficiently.
  
-<img src="images/fig-6.svg" width="45%">
-
-*Figure 6: Session Failure and Retry Flow*
+<div align="center">
+  <img src="images/fig-6.svg" alt="Session Failure and Retry Flow" width="45%">
+  <p><em>Figure 6: Session Failure and Retry Flow</em></p>
+</div>
  
 ### 8.3 Back-off Timers
  
